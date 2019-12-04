@@ -3,7 +3,7 @@
 const express = require('express');
 var path = require('path');
 const logger = require('morgan');
-var reload = require('reload')
+var reload = require('reload');
 
 // Constants
 const PORT = 8080;
@@ -23,7 +23,7 @@ app.get('/', (req, res) => {
 /*
 app.get('*', (req, res) => {
 	res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
-});
+}); 
 */
 
 
