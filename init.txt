@@ -3,3 +3,12 @@ docker run -p 80:8080 image
 output> Running on http://0.0.0.0:8080
 
 go to localhost
+
+
+
+New init:
+
+npm install
+npm run start
+
+go to http://localhost:8080/
