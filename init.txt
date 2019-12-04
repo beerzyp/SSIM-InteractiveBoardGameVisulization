@@ -1,0 +1,5 @@
+docker build -t image
+docker run -p 80:8080 image
+output> Running on http://0.0.0.0:8080
+
+go to localhost
