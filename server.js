@@ -9,7 +9,7 @@ const HOST = '0.0.0.0';
 // App
 const app = express();
 app.get('/', (req, res) => {
-  res.send('SSIM Interactive Board Game Visualization\n');
+  res.send('SSIM Interactive Board Game Visualization!!!!!!!!!!!!!!!!\n');
 });
 
 app.listen(PORT, HOST);
