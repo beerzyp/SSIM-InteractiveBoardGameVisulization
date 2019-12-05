@@ -1,0 +1,18 @@
+Setup environment was done by following the instructions in this link.
+Only the first part of the instructions was followed (the client part), which includes the react client.
+
+https://www.codementor.io/kakarganpat/how-to-setup-react-and-node-js-in-a-project-koxwqbssl
+
+
+To run:
+
+In the root, run: npm install
+In the client folder, run: npm install
+In the server folder, run: npm install
+
+In the root, run: npm start
+
+Go to localhost:3000 for client web page
+Go to localhost:3001 for server (Express)
+
+It should work, I hope.
