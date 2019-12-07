@@ -1,7 +1,14 @@
 import React from 'react';
-import { Button } from 'reactstrap';
+import { Button, Col, Row } from 'reactstrap';
 import logo from './logo.svg';
-import './App.css';
+
+import { Sigma, LoadJSON } from 'react-sigma';
+
+import './App.scss';
+
+var sigma = require("sigma-js");
+
+
 
 
 
@@ -9,22 +16,47 @@ import './App.css';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <Button color="danger">Danger!</Button>
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div id="containerDiv">
+        <Col id="hello">Hello</Col > 
+        <Col id="noHello" className="App">
+            {/*<header className="App-header">*/}
+                {/*<Button color="danger">Danger!</Button>*/}
+
+ 
+                {/*<div /*style={{ 'max-width': '400px', 'height': '400px', 'margin': 'auto' }} >*/}
+                <Sigma style={{width:"400px", height:"400px"}}>
+                    <LoadJSON path='data.json' />
+                </Sigma>
+                    {/* <script src="sigma.min.js"></script>
+                    <script src="sigma.parsers.json.min.js"></script>
+                    <script>
+                      {
+                    sigma.parsers.json('data.json', 
+                        {container: 'container'},
+                        {settings: ''},
+                        {defaultNodeColor: '#ec5148'}
+                        
+                    ) }
+                    </script>
+                      */}
+                {/*</div>*/}
+
+
+                {/*<img src={logo} className="App-logo" alt="logo" />
+                <p>
+                Edit <code>src/App.js</code> and save to reload.
+                </p>
+                <a
+                className="App-link"
+                href="https://reactjs.org"
+                target="_blank"
+                rel="noopener noreferrer"
+                >
+                Learn React
+                </a> 
+                */}
+            {/*</header>*/}
+        </Col>
     </div>
   );
 }

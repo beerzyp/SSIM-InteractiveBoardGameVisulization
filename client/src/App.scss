@@ -14,7 +14,10 @@
 }
 
 .App-header {
-  background-color: #282c34;
+  //background-color: #282c34;
+
+  //background-color: #9eb9f0;
+
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -35,4 +38,31 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+
+#containerDiv {
+  display: grid;
+  grid-template-columns: 200px auto;
+  margin: 5px;
+  padding:3px;
+}
+
+#hello {
+  grid-column: 1;
+  padding: 6px;
+}
+
+#noHello {
+  grid-column: 2;
+  //padding:30px;
+  border-width: 2px;
+  border-style: solid;
+  border-color: rgb(36, 36, 36);
+}
+
+#container {
+  max-width: 400px;
+  height: 400px;
+  margin: auto;
 }
