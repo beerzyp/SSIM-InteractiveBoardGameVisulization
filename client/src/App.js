@@ -14,7 +14,6 @@ class App extends Component {
         this.state = {
             text1: "",
             text2: ""
-            //isOpen: false
         };
     }
 

@@ -16,3 +16,14 @@ Go to localhost:3000 for client web page
 Go to localhost:3001 for server (Express)
 
 It should work, I hope.
+
+
+Notes:
+
+link to spotify graph web page: http://labs.polsys.net/playground/spotify/
+
+link to JSON BGG API: https://bgg-json.azurewebsites.net/
+
+link to react-sigma tutorial/help: https://www.npmjs.com/package/react-sigma
+
+link to a sigma tutorial: https://www.bsimard.com/2018/04/25/graph-viz-with-sigmajs.html#how-to
