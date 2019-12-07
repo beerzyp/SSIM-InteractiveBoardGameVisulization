@@ -20,6 +20,11 @@ It should work, I hope.
 
 Notes:
 
+BGG API:
+- limited to around 2 request per second. 
+- no resources for the related games
+- how to get all games to be able to search all games' genres and ratings (in order to get related games?)
+
 link to spotify graph web page: http://labs.polsys.net/playground/spotify/
 
 link to JSON BGG API: https://bgg-json.azurewebsites.net/
