@@ -15,6 +15,7 @@ class App extends Component {
             searchName: "",
             selectedSearch: null,
             searchNameWasSubmitted: false,
+            searchItemsResults: [],
             text1: "",
             text2: "",
             isLoading: false,
@@ -48,14 +49,46 @@ class App extends Component {
 
         this.setState({ isLoading: true });
 
-        await axios.get('https://www.boardgamegeek.com/xmlapi2/thing?id=013')
+        await axios.get('https://www.boardgamegeek.com/xmlapi2/search?query=' + this.state.searchName + '&type=boardgame')
             .then((response) => {
 
                 var parseString = require('xml2js').parseString;
                 var xml = response.data;
                 parseString(xml, function (err, result) {
+                    console.log(response.data);
                     console.log(result);
                 });
+
+
+
+                var parser, xmlDoc;
+                var text = response.data;
+                
+                parser = new DOMParser();
+                xmlDoc = parser.parseFromString(text, "text/xml");
+                
+                //Get the number of items - we know this will be two because we only passed in two IDs
+                var numberOfNames = xmlDoc.getElementsByTagName("item").length;
+                
+                //Create an array of the items
+                var items = xmlDoc.getElementsByTagName("item");
+                
+                for (let i=0; i<numberOfNames; i++) {
+                    //Create a new paragraph tag
+                    //var tempName = document.createElement("p");
+                    
+                    //Get the name of a game in the collection
+                    var gameName = items[i].getElementsByTagName('name')[0].getAttribute('value');
+
+                    this.state.searchItemsResults.push(gameName);
+                   
+                    //Set the contents of the paragraph tag to the game name
+                    //tempName.innerHTML = (i + 1 + ". ") + gameName;
+                    
+                    //Add the paragraph tag to the div in the body
+                    //document.getElementById("gameNames").appendChild(tempName);
+                }
+
 
                 this.setState({text1: response.data, });
             })
@@ -73,13 +106,13 @@ class App extends Component {
         this.setState({ isLoading: true, searchNameWasSubmitted: false });
 
         //Build the graph here
-        await axios.get('https://www.boardgamegeek.com/xmlapi2/thing?id=013')
+        await axios.get('https://www.boardgamegeek.com/xmlapi2/thing?id=1406')
             .then((response) => {
 
                 var parseString = require('xml2js').parseString;
                 var xml = response.data;
                 parseString(xml, function (err, result) {
-                    console.log(result);
+                    //console.log(result);
                 });
 
                 this.setState({text1: response.data, });
@@ -104,7 +137,7 @@ class App extends Component {
                 var parseString = require('xml2js').parseString;
                 var xml = response.data;
                 parseString(xml, function (err, result) {
-                    console.log(result);
+                    //console.log(result);
                 });
 
                 this.setState({text1: response.data, });
@@ -134,14 +167,14 @@ class App extends Component {
         }
 
         else {
-            if(this.state.nodeClicked != "")
+            if(this.state.nodeClicked !== "")
             {
                 return (
                     <Row id="gameClickedOnGraph">
                         <h4> Title of the Board Game Here</h4>
                         <img 
                             src="https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=350"
-                            alt="Board Game Image"
+                            alt="Board Game"
                         />
                         <p>
                             Rating: something/10
@@ -151,13 +184,19 @@ class App extends Component {
                 );
             }
 
-            else if (this.state.nodeClicked == "" && this.state.searchNameWasSubmitted) {
+            else if (this.state.nodeClicked === "" && this.state.searchNameWasSubmitted) {
                 return (
                     <Row id="nameSearchResults">
                         <ul>
+                                {this.state.searchItemsResults.map(item => (
+                                    <li onClick={this.handleStartBuildingGraph} key={item}> {item} </li>
+                                  ))}
+                    
+                            {/*
                             <li onClick={this.handleStartBuildingGraph}> 1st Game</li>
                             <li onClick={this.handleStartBuildingGraph}> 2nd Game</li>
                             <li onClick={this.handleStartBuildingGraph}> 3rd Game</li>
+                            */}
                         </ul>
                     </Row>  
                 );
@@ -174,8 +213,8 @@ class App extends Component {
         return (
             <div id="containerDiv">
                 <Col id="sideBar">
-                    { console.log(this.state.text1) } 
-                    { console.log(this.state.text2) }
+                    { /*console.log(this.state.text1)*/ } 
+                    { /*console.log(this.state.text2)*/ }
                     <header>
                         Board Game Network
                     </header>
