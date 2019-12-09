@@ -14,43 +14,160 @@ class App extends Component {
         this.state = {
             searchName: "",
             selectedSearch: null,
+            searchNameWasSubmitted: false,
             text1: "",
-            text2: ""
+            text2: "",
+            isLoading: false,
+            nodeClicked: ""
         };
-        this.displaySelectedNodeInfo = this.displaySelectedNodeInfo.bind(this);
-        this.handleChangeSelect = this.handleChangeSelect.bind(this);
+
         this.handleChangeSearch = this.handleChangeSearch.bind(this);
+        this.handleChangeSelect = this.handleChangeSelect.bind(this);
+
         this.handleSubmit = this.handleSubmit.bind(this);
-  }
+        this.handleStartBuildingGraph = this.handleStartBuildingGraph.bind(this);
+        this.handleGraphNodeClick = this.handleGraphNodeClick.bind(this);
 
-  displaySelectedNodeInfo() {
-      return (
-        <Row id="gameClickedOnGraph">
-        <h4> Title of the Board Game Here</h4>
-        <img 
-            src="https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=350"
-            alt="new"
-        />
-        <p>
-            Rating: something/10
-        </p>
+        this.displaySideBarInformation = this.displaySideBarInformation.bind(this);
+    }
 
-    </Row>  
-      );
-  }
 
-  handleChangeSearch(event) {
-    this.setState({searchName: event.target.value});
-  }
+    handleChangeSearch(event) {
+        this.setState({ searchName: event.target.value });
+    }
 
-  handleChangeSelect(event) {
-      this.setState({ selectedSearch: event.target.value });
-  }
 
-  handleSubmit(event) {
-    alert('A name was submitted: ' + this.state.searchName + '\n' + 'The selected box was: ' + this.state.selectedSearch);
-    event.preventDefault();
-  }
+    handleChangeSelect(event) {
+        this.setState({ selectedSearch: event.target.value });
+    }
+
+
+    async handleSubmit(event) {
+        //alert('A name was submitted: ' + this.state.searchName + '\n' + 'The selected box was: ' + this.state.selectedSearch);
+        event.preventDefault();
+
+        this.setState({ isLoading: true });
+
+        await axios.get('https://www.boardgamegeek.com/xmlapi2/thing?id=013')
+            .then((response) => {
+
+                var parseString = require('xml2js').parseString;
+                var xml = response.data;
+                parseString(xml, function (err, result) {
+                    console.log(result);
+                });
+
+                this.setState({text1: response.data, });
+            })
+            .catch(err => {
+                console.log(err);
+                return null;
+            });
+
+        this.setState({ isLoading: false, searchNameWasSubmitted: true });
+    }
+
+
+    async handleStartBuildingGraph() {
+
+        this.setState({ isLoading: true, searchNameWasSubmitted: false });
+
+        //Build the graph here
+        await axios.get('https://www.boardgamegeek.com/xmlapi2/thing?id=013')
+            .then((response) => {
+
+                var parseString = require('xml2js').parseString;
+                var xml = response.data;
+                parseString(xml, function (err, result) {
+                    console.log(result);
+                });
+
+                this.setState({text1: response.data, });
+            })
+            .catch(err => {
+                console.log(err);
+                return null;
+            });
+
+
+        this.setState({ isLoading: false });
+    }
+
+
+    async handleGraphNodeClick() {
+        //event.preventDefault();
+        this.setState({ isLoading: true });
+
+        await axios.get('https://www.boardgamegeek.com/xmlapi2/thing?id=013')
+            .then((response) => {
+
+                var parseString = require('xml2js').parseString;
+                var xml = response.data;
+                parseString(xml, function (err, result) {
+                    console.log(result);
+                });
+
+                this.setState({text1: response.data, });
+            })
+            .catch(err => {
+                console.log(err);
+                return null;
+            });
+
+        this.setState({ isLoading: false, searchNameWasSubmitted: true });
+    }
+
+
+    displaySideBarInformation() {
+        if(this.state.isLoading) {
+            return(   
+                <Row id="loadingRow">
+                    <img 
+                        id="loadingImage"
+                        src="https://media.giphy.com/media/3o7bu8sRnYpTOG1p8k/source.gif"
+                        //src="https://media.giphy.com/media/sSgvbe1m3n93G/source.gif"
+                        alt="Loading"
+                    />
+                    <p>Loading</p>
+                </Row>
+            );
+        }
+
+        else {
+            if(this.state.nodeClicked != "")
+            {
+                return (
+                    <Row id="gameClickedOnGraph">
+                        <h4> Title of the Board Game Here</h4>
+                        <img 
+                            src="https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=350"
+                            alt="Board Game Image"
+                        />
+                        <p>
+                            Rating: something/10
+                        </p>
+
+                    </Row>  
+                );
+            }
+
+            else if (this.state.nodeClicked == "" && this.state.searchNameWasSubmitted) {
+                return (
+                    <Row id="nameSearchResults">
+                        <ul>
+                            <li onClick={this.handleStartBuildingGraph}> 1st Game</li>
+                            <li onClick={this.handleStartBuildingGraph}> 2nd Game</li>
+                            <li onClick={this.handleStartBuildingGraph}> 3rd Game</li>
+                        </ul>
+                    </Row>  
+                );
+            }
+
+            else {
+                return;
+            }
+        }
+    }
 
 
     render() {
@@ -71,11 +188,6 @@ class App extends Component {
                     </p>
                     <form onSubmit={this.handleSubmit}>
                         <label>
-                            {/*<select value={this.state.selectedSearch} onChange={this.handleChangeSelect}>
-                                <option value="related by rating and genre">Grapefruit</option>
-                                <option value="related by creator">Lime</option>
-                            </select>
-        */}
                             <ul>
                                 <li>
                                     <label>
@@ -107,14 +219,11 @@ class App extends Component {
                         <input type="submit" value="Submit" />
                     </form>
 
-
-                    {this.displaySelectedNodeInfo()}
-                    
+                    {this.displaySideBarInformation()}
 
                 </Col> 
                 <Col id="sigmaCol" className="App">
 
-        
                         {/*<div /*style={{ 'max-width': '400px', 'height': '400px', 'margin': 'auto' }} >*/}
                         <Sigma style={{width:"400px", height:"400px"}}>
                             <LoadJSON path='data.json'/>
@@ -138,10 +247,9 @@ class App extends Component {
         );
     }
 
-
+/*
     async componentDidMount() {
-
-        //await axios.get('https://dog.ceo/api/breeds/list/all')
+        
         await axios.get('https://www.boardgamegeek.com/xmlapi2/thing?id=013')
         .then((response) => {
 
@@ -166,10 +274,10 @@ class App extends Component {
         .catch(err => {
             console.log(err);
             return null;
-        });
+        });      
 
     }
+    */
 
 }
-
 export default App;

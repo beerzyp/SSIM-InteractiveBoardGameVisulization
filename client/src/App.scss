@@ -96,6 +96,29 @@
   font-size: smaller;
 }
 
+#loadingRow {
+  margin: 10px;
+  display: grid;
+  grid-template-columns: 20px auto;
+}
+
+#loadingRow img {
+  max-width:100%;
+  height:auto;
+  padding-top: 2px;
+  grid-column: 1;
+}
+
+#loadingRow p {
+  grid-column: 2;
+  padding-left: 10px;
+  margin: 0px;
+}
+
+#nameSearchResults li {
+  cursor: pointer;
+}
+
 
 #sigmaCol {
   grid-column: 2;
