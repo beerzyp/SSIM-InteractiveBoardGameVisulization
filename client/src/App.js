@@ -13,19 +13,25 @@ class App extends Component {
         super(props);
         this.state = {
             searchName: "",
+            selectedSearch: null,
             text1: "",
             text2: ""
         };
-        this.handleChange = this.handleChange.bind(this);
+        this.handleChangeSelect = this.handleChangeSelect.bind(this);
+        this.handleChangeSearch = this.handleChangeSearch.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  handleChange(event) {
+  handleChangeSearch(event) {
     this.setState({searchName: event.target.value});
   }
 
+  handleChangeSelect(event) {
+      this.setState({ selectedSearch: event.target.value });
+  }
+
   handleSubmit(event) {
-    alert('A name was submitted: ' + this.state.searchName);
+    alert('A name was submitted: ' + this.state.searchName + '\n' + 'The selected box was: ' + this.state.selectedSearch);
     event.preventDefault();
   }
 
@@ -48,7 +54,38 @@ class App extends Component {
                     </p>
                     <form onSubmit={this.handleSubmit}>
                         <label>
-                            <input type="text" value={this.state.searchName} onChange={this.handleChange} />
+                            {/*<select value={this.state.selectedSearch} onChange={this.handleChangeSelect}>
+                                <option value="related by rating and genre">Grapefruit</option>
+                                <option value="related by creator">Lime</option>
+                            </select>
+        */}
+                            <ul>
+                                <li>
+                                    <label>
+                                        <input
+                                            type="radio"
+                                            value="related by genre and rating"
+                                            checked={this.state.selectedSearch === "related by genre and rating"}
+                                            onChange={this.handleChangeSelect}
+                                        />
+                                        Related by genre and rating
+                                    </label>
+                                    </li>
+                                    
+                                    <li>
+                                    <label>
+                                        <input
+                                        type="radio"
+                                        value="related by creator"
+                                        checked={this.state.selectedSearch === "related by creator"}
+                                        onChange={this.handleChangeSelect}
+                                        />
+                                        Related by creator
+                                    </label>
+                                </li>
+                            </ul>
+
+                            <input type="text" value={this.state.searchName} onChange={this.handleChangeSearch} />
                         </label>
                         <input type="submit" value="Submit" />
                     </form>
