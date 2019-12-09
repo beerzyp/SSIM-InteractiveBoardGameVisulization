@@ -79,10 +79,22 @@
 }
 
 #sideBar li {
-    list-style-type: none;
-    font-size: smaller;
+  list-style-type: none;
+  font-size: smaller;
 }
 
+#gameClickedOnGraph {
+  margin-top: 24px;
+}
+
+#gameClickedOnGraph img {
+  max-width:100%;
+  height:auto;
+}
+
+#gameClickedOnGraph {
+  font-size: smaller;
+}
 
 
 #sigmaCol {

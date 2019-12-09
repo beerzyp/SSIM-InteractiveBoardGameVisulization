@@ -15,7 +15,8 @@
     "react-scripts": "3.3.0",
     "react-sigma": "^1.2.31",
     "reactstrap": "^8.2.0",
-    "sigma-js": "^1.1.5"
+    "sigma-js": "^1.1.5",
+    "xml2js": "^0.4.22"
   },
   "scripts": {
     "start": "react-scripts start",

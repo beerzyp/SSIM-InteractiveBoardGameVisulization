@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Col } from 'reactstrap';
+import { Col, Row } from 'reactstrap';
 import { Sigma, LoadJSON } from 'react-sigma';
 import axios from 'axios';
 
@@ -17,9 +17,26 @@ class App extends Component {
             text1: "",
             text2: ""
         };
+        this.displaySelectedNodeInfo = this.displaySelectedNodeInfo.bind(this);
         this.handleChangeSelect = this.handleChangeSelect.bind(this);
         this.handleChangeSearch = this.handleChangeSearch.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  displaySelectedNodeInfo() {
+      return (
+        <Row id="gameClickedOnGraph">
+        <h4> Title of the Board Game Here</h4>
+        <img 
+            src="https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=350"
+            alt="new"
+        />
+        <p>
+            Rating: something/10
+        </p>
+
+    </Row>  
+      );
   }
 
   handleChangeSearch(event) {
@@ -89,6 +106,11 @@ class App extends Component {
                         </label>
                         <input type="submit" value="Submit" />
                     </form>
+
+
+                    {this.displaySelectedNodeInfo()}
+                    
+
                 </Col> 
                 <Col id="sigmaCol" className="App">
 
@@ -122,6 +144,13 @@ class App extends Component {
         //await axios.get('https://dog.ceo/api/breeds/list/all')
         await axios.get('https://www.boardgamegeek.com/xmlapi2/thing?id=013')
         .then((response) => {
+
+            var parseString = require('xml2js').parseString;
+            var xml = response.data;
+            parseString(xml, function (err, result) {
+                console.dir(result);
+            });
+
             this.setState({text1: response.data});
         })
         .catch(err => {
