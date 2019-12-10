@@ -17,8 +17,6 @@ class App extends Component {
             selectedSearch: null,
             searchNameWasSubmitted: false,
             searchItemsResults: [],
-            text1: "",
-            text2: "",
             isLoading: false,
             nodeClicked: null
         };
@@ -67,7 +65,6 @@ class App extends Component {
                     console.log('Here Here JSon: ' + result);
                 });
                 */
-                
 
                 var parser, xmlDoc;
                 var text = response.data;
@@ -92,15 +89,6 @@ class App extends Component {
         await axios.get('https://www.boardgamegeek.com/xmlapi2/search?query=' + this.state.searchName + '&type=boardgame')
             .then((response) => {
 
-                /*
-                var parseString = require('xml2js').parseString;
-                var xml = response.data;
-                parseString(xml, function (err, result) {
-                    console.log(response.data);
-                    console.log(result);
-                });
-                */
-
                 var parser, xmlDoc;
                 var text = response.data;
                 
@@ -119,7 +107,6 @@ class App extends Component {
                         if(items[i].getAttribute('id') !== this.state.searchItemsResults[0].getAttribute('id'))
                         {
                             this.state.searchItemsResults.push(items[i]);
-                            //console.log(items[i]);
                         }
                     }
 
@@ -142,33 +129,9 @@ class App extends Component {
 
     async handleStartBuildingGraph(item) {
 
-        console.log(item);
+        this.setState({ isLoading: true, searchNameWasSubmitted: false, previouslySearchedName: "" });
 
-        
-        //query for specific item id to get more info
-        await axios.get('https://www.boardgamegeek.com/xmlapi2/thing?id=' + item.getAttribute('id') /*'https://www.boardgamegeek.com/xmlapi2/thing?id=1406'*/)
-        .then((response) => {
-
-            var parser, xmlDoc;
-            var text = response.data;
-            
-            parser = new DOMParser();
-            xmlDoc = parser.parseFromString(text, "text/xml");
-        
-            console.log(xmlDoc);
-
-            this.setState({ nodeClicked: xmlDoc });
-
-            this.setState({text1: response.data, });
-        })
-        .catch(err => {
-            console.log(err);
-            return null;
-        });
-
-        this.setState({ isLoading: true, searchNameWasSubmitted: false/*, nodeClicked: item*/ });
-
-        //Build the graph here
+        //TODO: Build the graph here
         await axios.get('https://www.boardgamegeek.com/xmlapi2/thing?id=1406')
             .then((response) => {
 
@@ -178,43 +141,48 @@ class App extends Component {
                     //console.log(result);
                 });
 
-                this.setState({text1: response.data, });
             })
             .catch(err => {
                 console.log(err);
                 return null;
             });
+
+        this.handleGraphNodeClick(item);
+
+        this.setState({ isLoading: false });
+    }
+
+
+    //Receives item in xmlDoc form
+    async handleGraphNodeClick(item) {
+
+        this.setState({ isLoading: true, searchNameWasSubmitted: false, previouslySearchedName: "" });
+
+        //query for specific item id to get more info
+        await axios.get('https://www.boardgamegeek.com/xmlapi2/thing?id=' + item.getAttribute('id') + '&stats=1')
+        .then((response) => {
+
+            var parser, xmlDoc;
+            var text = response.data;
+            
+            parser = new DOMParser();
+            xmlDoc = parser.parseFromString(text, "text/xml");
+            //console.log('testing normal id response.data: ' + response.data);
+
+            this.setState({ nodeClicked: xmlDoc });
+        })
+        .catch(err => {
+            console.log(err);
+            return null;
+        });
 
 
         this.setState({ isLoading: false });
     }
 
 
-    async handleGraphNodeClick() {
-        //event.preventDefault();
-        this.setState({ isLoading: true });
-
-        await axios.get('https://www.boardgamegeek.com/xmlapi2/thing?id=013')
-            .then((response) => {
-
-                var parseString = require('xml2js').parseString;
-                var xml = response.data;
-                parseString(xml, function (err, result) {
-                    //console.log(result);
-                });
-
-                this.setState({text1: response.data, });
-            })
-            .catch(err => {
-                console.log(err);
-                return null;
-            });
-
-        this.setState({ isLoading: false, searchNameWasSubmitted: true });
-    }
-
-
     displaySideBarInformation() {
+
         if(this.state.isLoading) {
             return(   
                 <Row id="loadingRow">
@@ -229,23 +197,30 @@ class App extends Component {
             );
         }
 
-        else {
+        else 
+        {
             if(this.state.nodeClicked !== null)
             { 
-                //TODO: Cant find rating from item xml...
-                console.log('herererereer: ' + this.state.nodeClicked);
-                //console.log('balbablalbabl: ' + this.state.nodeClicked.getAttribute("rating"));
+                let ratingAverage = parseFloat(this.state.nodeClicked.getElementsByTagName('average')[0].getAttribute('value')).toFixed(1);
+                let gameName = this.state.nodeClicked.getElementsByTagName('name')[0].getAttribute('value');
+
+                let gameImage;
+                let gameImageTag = this.state.nodeClicked.getElementsByTagName("image");
+                if(gameImageTag.length > 0)
+                {
+                    gameImage = this.state.nodeClicked.getElementsByTagName("image")[0].childNodes[0].nodeValue;
+                }
 
                 return (
                     <Row id="gameClickedOnGraph">
-                        <h4> { this.state.nodeClicked.getElementsByTagName('name')[0].getAttribute('value') } </h4>
+                        <h4> { gameName } </h4>
                         <img 
-                            src={ this.state.nodeClicked.getElementsByTagName("image")[0].childNodes[0].nodeValue }
-                            //src="https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=350"
+                            src = { gameImage }
                             alt="Board Game"
                         />
                         <p>
-                            Rating: something/10
+                            Rating:  
+                            {ratingAverage} / 10
                         </p>
 
                     </Row>  
@@ -257,14 +232,15 @@ class App extends Component {
                     <Row id="nameSearchResults">
                         <ul>
                             { this.state.searchItemsResults.map(item => (
-                                <li onClick={() => this.handleStartBuildingGraph(item)} /*onClick={this.handleStartBuildingGraph}*/ key={item.getAttribute('id')}> {item.getElementsByTagName('name')[0].getAttribute('value')} </li>
+                                <li onClick={() => this.handleStartBuildingGraph(item)} key={item.getAttribute('id')}> {item.getElementsByTagName('name')[0].getAttribute('value')} </li>
                             ))}
                         </ul>
                     </Row>  
                 );
             }
 
-            else {
+            else 
+            {
                 return;
             }
         }
@@ -321,6 +297,7 @@ class App extends Component {
                     {this.displaySideBarInformation()}
 
                 </Col> 
+
                 <Col id="sigmaCol">
 
                         {/*<div /*style={{ 'max-width': '400px', 'height': '400px', 'margin': 'auto' }} >*/}
