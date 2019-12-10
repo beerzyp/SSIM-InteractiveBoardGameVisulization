@@ -20,15 +20,17 @@ class App extends Component {
             isLoading: false,
             nodeClicked: null,
             previousNodeClickedId: "",
-            isGraphBuilt: false
+            graphJson: null,
+            isGraphBuilt: false,
+            gameIdPreviousGraphBuilt: ""
         };
 
         this.handleChangeSearch = this.handleChangeSearch.bind(this);
         this.handleChangeSelect = this.handleChangeSelect.bind(this);
 
         this.handleSubmit = this.handleSubmit.bind(this);
-        this.handleStartBuildingGraph = this.handleStartBuildingGraph.bind(this);
         this.handleGraphNodeClick = this.handleGraphNodeClick.bind(this);
+        this.buildGraph = this.buildGraph.bind(this);
 
         this.displaySideBarInformation = this.displaySideBarInformation.bind(this);
         this.displayGraph = this.displayGraph.bind(this);
@@ -57,6 +59,7 @@ class App extends Component {
 
         var isThereExactMatch = false;
 
+        //Search for an exact match first
         await axios.get('https://www.boardgamegeek.com/xmlapi2/search?query=' + this.state.searchName + '&type=boardgame&exact=1')
             .then((response) => {
 
@@ -89,6 +92,7 @@ class App extends Component {
                 return null;
             });
 
+        //Then search for all other matches
         await axios.get('https://www.boardgamegeek.com/xmlapi2/search?query=' + this.state.searchName + '&type=boardgame')
             .then((response) => {
 
@@ -130,32 +134,6 @@ class App extends Component {
     }
 
 
-    async handleStartBuildingGraph(item) {
-
-        this.setState({ isLoading: true, searchNameWasSubmitted: false, previouslySearchedName: "", isGraphBuilt: false, previousNodeClickedId: "" });
-
-        //TODO: Build the graph here
-        await axios.get('https://www.boardgamegeek.com/xmlapi2/thing?id=1406')
-            .then((response) => {
-
-                var parseString = require('xml2js').parseString;
-                var xml = response.data;
-                parseString(xml, function (err, result) {
-                    //console.log(result);
-                });
-
-            })
-            .catch(err => {
-                console.log(err);
-                return null;
-            });
-
-        this.handleGraphNodeClick(null, item);
-
-        this.setState({ isLoading: false, isGraphBuilt: true });
-    }
-
-
     //Receives item in xmlDoc form
     async handleGraphNodeClick(event, item) {
 
@@ -185,7 +163,6 @@ class App extends Component {
             
             parser = new DOMParser();
             xmlDoc = parser.parseFromString(text, "text/xml");
-            //console.log('testing normal id response.data: ' + response.data);
 
             this.setState({ nodeClicked: xmlDoc });
         })
@@ -196,6 +173,60 @@ class App extends Component {
         
 
         this.setState({ isLoading: false, previousNodeClickedId: id });
+    }
+
+
+    async buildGraph(item) {
+
+        this.setState({ searchNameWasSubmitted: false, previouslySearchedName: "", previousNodeClickedId: "" });
+
+        if(item.getAttribute('id') === this.state.gameIdPreviousGraphBuilt)
+        {
+            this.handleGraphNodeClick(null, item);
+            return;
+        }
+
+        this.setState({ isLoading: true, isGraphBuilt: false });
+
+        //TODO: Build the graph here        
+        await axios.get('https://www.boardgamegeek.com/xmlapi2/thing?id=1406')
+            .then((response) => {
+
+                var parseString = require('xml2js').parseString;
+                var xml = response.data;
+                parseString(xml, function (err, result) {
+                    //console.log(result);
+                });
+
+            })
+            .catch(err => {
+                console.log(err);
+                return null;
+            });
+            
+
+
+        let myGraph = {nodes:[], edges:[]};
+        //let myGraph = {nodes:[{id:"1406", label:"Monopoly"}, {id:"1407", label:"Whatever"}], edges:[{id:"e1",source:"1406",target:"1407",label:"SEES"}]};
+
+
+        //Just an example of a graph built out of the other searched results
+        let items = this.state.searchItemsResults;
+
+        for(let i = 0; i < items.length; i++)
+        {
+            myGraph.nodes.push({id:items[i].getAttribute('id'), label:items[i].getElementsByTagName('name')[0].getAttribute('value')});
+            if(i !== 0)
+            {
+                myGraph.edges.push({id:'e' + items[i].getAttribute('id'), source: items[0].getAttribute('id'), target:items[i].getAttribute('id'), label:"SEES"});
+            }
+        }
+
+        console.log(myGraph);
+
+        this.handleGraphNodeClick(null, item);
+
+        this.setState({ isLoading: false, graphJson: myGraph, isGraphBuilt: true, gameIdPreviousGraphBuilt: item.getAttribute('id') });
     }
 
 
@@ -250,7 +281,7 @@ class App extends Component {
                     <Row id="nameSearchResults">
                         <ul>
                             { this.state.searchItemsResults.map(item => (
-                                <li onClick={() => this.handleStartBuildingGraph(item)} key={item.getAttribute('id')}> {item.getElementsByTagName('name')[0].getAttribute('value')} </li>
+                                <li onClick={() => this.buildGraph(item)} key={item.getAttribute('id')}> {item.getElementsByTagName('name')[0].getAttribute('value')} </li>
                             ))}
                         </ul>
                     </Row>  
@@ -266,12 +297,9 @@ class App extends Component {
 
 
     displayGraph() {
-
-        let myGraph = {nodes:[{id:"1406", label:"Monopoly"}, {id:"1407", label:"Whatever"}], edges:[{id:"e1",source:"1406",target:"1407",label:"SEES"}]};
-
         if(this.state.isGraphBuilt) {
             return (
-                <Sigma id="sigmaGraph" style={{ width:"100%", height:"100%" }} onClickNode={this.handleGraphNodeClick} graph={myGraph} settings={{drawEdges: true, clone: false}}>
+                <Sigma id="sigmaGraph" style={{ width:"100%", height:"100%" }} onClickNode={this.handleGraphNodeClick} graph={this.state.graphJson} settings={{drawEdges: true, clone: false}}>
                     <RelativeSize initialSize={15}/>
                     <RandomizeNodePositions/>
                     <EdgeShapes default="tapered"/>
@@ -283,9 +311,6 @@ class App extends Component {
 
 
     render() {
-
-        //let myGraph = {nodes:[{id:"1406", label:"Monopoly"}, {id:"1407", label:"Whatever"}], edges:[{id:"e1",source:"1406",target:"1407",label:"SEES"}]};
-
         return (
             <div id="containerDiv">
                 <Col id="sideBar">
