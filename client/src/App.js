@@ -18,7 +18,9 @@ class App extends Component {
             searchNameWasSubmitted: false,
             searchItemsResults: [],
             isLoading: false,
-            nodeClicked: null
+            nodeClicked: null,
+            previousNodeClickedId: "",
+            isGraphBuilt: false
         };
 
         this.handleChangeSearch = this.handleChangeSearch.bind(this);
@@ -29,6 +31,7 @@ class App extends Component {
         this.handleGraphNodeClick = this.handleGraphNodeClick.bind(this);
 
         this.displaySideBarInformation = this.displaySideBarInformation.bind(this);
+        this.displayGraph = this.displayGraph.bind(this);
     }
 
 
@@ -50,7 +53,7 @@ class App extends Component {
             return;
         }
         
-        this.setState({ isLoading: true, searchItemsResults: [], nodeClicked: null });
+        this.setState({ isLoading: true, searchItemsResults: [], nodeClicked: null, previousNodeClickedId: "" });
 
         var isThereExactMatch = false;
 
@@ -129,7 +132,7 @@ class App extends Component {
 
     async handleStartBuildingGraph(item) {
 
-        this.setState({ isLoading: true, searchNameWasSubmitted: false, previouslySearchedName: "" });
+        this.setState({ isLoading: true, searchNameWasSubmitted: false, previouslySearchedName: "", isGraphBuilt: false, previousNodeClickedId: "" });
 
         //TODO: Build the graph here
         await axios.get('https://www.boardgamegeek.com/xmlapi2/thing?id=1406')
@@ -149,27 +152,29 @@ class App extends Component {
 
         this.handleGraphNodeClick(null, item);
 
-        this.setState({ isLoading: false });
+        this.setState({ isLoading: false, isGraphBuilt: true });
     }
 
 
     //Receives item in xmlDoc form
     async handleGraphNodeClick(event, item) {
 
-        this.setState({ isLoading: true, searchNameWasSubmitted: false, previouslySearchedName: "" });
-
         var id = "";
-
         if(event === null)
         {
             id = item.getAttribute('id');
         }
         else
         {
-            id = event.data.node.id
+            id = event.data.node.id;
         }
-        
-        //console.log(event.data.node.id);
+
+        if(id === this.state.previousNodeClickedId)
+        {
+            return;
+        }
+
+        this.setState({ isLoading: true, searchNameWasSubmitted: false, previouslySearchedName: "" });
         
         //query for specific item id to get more info
         await axios.get('https://www.boardgamegeek.com/xmlapi2/thing?id=' + id/*item*//*item.getAttribute('id')*/ + '&stats=1')
@@ -190,8 +195,7 @@ class App extends Component {
         });
         
 
-
-        this.setState({ isLoading: false });
+        this.setState({ isLoading: false, previousNodeClickedId: id });
     }
 
 
@@ -261,9 +265,26 @@ class App extends Component {
     }
 
 
-    render() {
+    displayGraph() {
 
         let myGraph = {nodes:[{id:"1406", label:"Monopoly"}, {id:"1407", label:"Whatever"}], edges:[{id:"e1",source:"1406",target:"1407",label:"SEES"}]};
+
+        if(this.state.isGraphBuilt) {
+            return (
+                <Sigma id="sigmaGraph" style={{ width:"100%", height:"100%" }} onClickNode={this.handleGraphNodeClick} graph={myGraph} settings={{drawEdges: true, clone: false}}>
+                    <RelativeSize initialSize={15}/>
+                    <RandomizeNodePositions/>
+                    <EdgeShapes default="tapered"/>
+                    <NodeShapes default="star"/>
+                </Sigma>
+            )
+        }
+    }
+
+
+    render() {
+
+        //let myGraph = {nodes:[{id:"1406", label:"Monopoly"}, {id:"1407", label:"Whatever"}], edges:[{id:"e1",source:"1406",target:"1407",label:"SEES"}]};
 
         return (
             <div id="containerDiv">
@@ -317,14 +338,8 @@ class App extends Component {
 
                 <Col id="sigmaCol">
 
+                    {this.displayGraph()}
                     
-                    <Sigma id="sigmaGraph" style={{ width:"100%", height:"100%" }} onClickNode={this.handleGraphNodeClick} graph={myGraph} settings={{drawEdges: true, clone: false}}>
-                    <RelativeSize initialSize={15}/>
-                    <RandomizeNodePositions/>
-                    <EdgeShapes default="tapered"/>
-                    <NodeShapes default="star"/>
-                    </Sigma>
-
 
                         {/*<div /*style={{ 'max-width': '400px', 'height': '400px', 'margin': 'auto' }} >*/}
                         {/*
