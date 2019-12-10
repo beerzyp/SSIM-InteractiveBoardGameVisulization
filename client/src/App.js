@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Col, Row } from 'reactstrap';
-import { Sigma, LoadJSON } from 'react-sigma';
+import { Sigma, LoadJSON, RandomizeNodePositions, RelativeSize, EdgeShapes, NodeShapes } from 'react-sigma';
 import axios from 'axios';
 
 import './App.scss';
@@ -147,19 +147,32 @@ class App extends Component {
                 return null;
             });
 
-        this.handleGraphNodeClick(item);
+        this.handleGraphNodeClick(null, item);
 
         this.setState({ isLoading: false });
     }
 
 
     //Receives item in xmlDoc form
-    async handleGraphNodeClick(item) {
+    async handleGraphNodeClick(event, item) {
 
         this.setState({ isLoading: true, searchNameWasSubmitted: false, previouslySearchedName: "" });
 
+        var id = "";
+
+        if(event === null)
+        {
+            id = item.getAttribute('id');
+        }
+        else
+        {
+            id = event.data.node.id
+        }
+        
+        //console.log(event.data.node.id);
+        
         //query for specific item id to get more info
-        await axios.get('https://www.boardgamegeek.com/xmlapi2/thing?id=' + item.getAttribute('id') + '&stats=1')
+        await axios.get('https://www.boardgamegeek.com/xmlapi2/thing?id=' + id/*item*//*item.getAttribute('id')*/ + '&stats=1')
         .then((response) => {
 
             var parser, xmlDoc;
@@ -175,6 +188,7 @@ class App extends Component {
             console.log(err);
             return null;
         });
+        
 
 
         this.setState({ isLoading: false });
@@ -248,6 +262,9 @@ class App extends Component {
 
 
     render() {
+
+        let myGraph = {nodes:[{id:"1406", label:"Monopoly"}, {id:"1407", label:"Whatever"}], edges:[{id:"e1",source:"1406",target:"1407",label:"SEES"}]};
+
         return (
             <div id="containerDiv">
                 <Col id="sideBar">
@@ -300,10 +317,21 @@ class App extends Component {
 
                 <Col id="sigmaCol">
 
+                    
+                    <Sigma id="sigmaGraph" style={{ width:"100%", height:"100%" }} onClickNode={this.handleGraphNodeClick} graph={myGraph} settings={{drawEdges: true, clone: false}}>
+                    <RelativeSize initialSize={15}/>
+                    <RandomizeNodePositions/>
+                    <EdgeShapes default="tapered"/>
+                    <NodeShapes default="star"/>
+                    </Sigma>
+
+
                         {/*<div /*style={{ 'max-width': '400px', 'height': '400px', 'margin': 'auto' }} >*/}
+                        {/*
                         <Sigma id="sigmaGraph" style={{ width:"100%", height:"100%" }}>
                             <LoadJSON path='data.json'/>
                         </Sigma>
+                        */}
                             {/* <script src="sigma.min.js"></script>
                             <script src="sigma.parsers.json.min.js"></script>
                             <script>
