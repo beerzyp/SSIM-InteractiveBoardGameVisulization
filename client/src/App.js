@@ -13,13 +13,14 @@ class App extends Component {
         super(props);
         this.state = {
             searchName: "",
+            previouslySearchedName: "",
             selectedSearch: null,
             searchNameWasSubmitted: false,
             searchItemsResults: [],
             text1: "",
             text2: "",
             isLoading: false,
-            nodeClicked: ""
+            nodeClicked: null
         };
 
         this.handleChangeSearch = this.handleChangeSearch.bind(this);
@@ -44,22 +45,29 @@ class App extends Component {
 
 
     async handleSubmit(event) {
-        //alert('A name was submitted: ' + this.state.searchName + '\n' + 'The selected box was: ' + this.state.selectedSearch);
         event.preventDefault();
 
-        this.setState({ isLoading: true });
+        if(this.state.searchName === this.state.previouslySearchedName)
+        {
+            return;
+        }
+        
+        this.setState({ isLoading: true, searchItemsResults: [], nodeClicked: null });
 
-        await axios.get('https://www.boardgamegeek.com/xmlapi2/search?query=' + this.state.searchName + '&type=boardgame')
+        var isThereExactMatch = false;
+
+        await axios.get('https://www.boardgamegeek.com/xmlapi2/search?query=' + this.state.searchName + '&type=boardgame&exact=1')
             .then((response) => {
 
+                /*
                 var parseString = require('xml2js').parseString;
                 var xml = response.data;
                 parseString(xml, function (err, result) {
-                    console.log(response.data);
-                    console.log(result);
+                    console.log('Here here: ' + response.data);
+                    console.log('Here Here JSon: ' + result);
                 });
-
-
+                */
+                
 
                 var parser, xmlDoc;
                 var text = response.data;
@@ -67,43 +75,98 @@ class App extends Component {
                 parser = new DOMParser();
                 xmlDoc = parser.parseFromString(text, "text/xml");
                 
-                //Get the number of items - we know this will be two because we only passed in two IDs
-                var numberOfNames = xmlDoc.getElementsByTagName("item").length;
-                
                 //Create an array of the items
                 var items = xmlDoc.getElementsByTagName("item");
                 
-                for (let i=0; i<numberOfNames; i++) {
-                    //Create a new paragraph tag
-                    //var tempName = document.createElement("p");
-                    
-                    //Get the name of a game in the collection
-                    var gameName = items[i].getElementsByTagName('name')[0].getAttribute('value');
-
-                    this.state.searchItemsResults.push(gameName);
-                   
-                    //Set the contents of the paragraph tag to the game name
-                    //tempName.innerHTML = (i + 1 + ". ") + gameName;
-                    
-                    //Add the paragraph tag to the div in the body
-                    //document.getElementById("gameNames").appendChild(tempName);
+                if(items.length !== 0)
+                {
+                    isThereExactMatch = true;
+                    this.state.searchItemsResults.push(items[0]);
                 }
-
-
-                this.setState({text1: response.data, });
             })
             .catch(err => {
                 console.log(err);
                 return null;
             });
 
-        this.setState({ isLoading: false, searchNameWasSubmitted: true });
+        await axios.get('https://www.boardgamegeek.com/xmlapi2/search?query=' + this.state.searchName + '&type=boardgame')
+            .then((response) => {
+
+                /*
+                var parseString = require('xml2js').parseString;
+                var xml = response.data;
+                parseString(xml, function (err, result) {
+                    console.log(response.data);
+                    console.log(result);
+                });
+                */
+
+                var parser, xmlDoc;
+                var text = response.data;
+                
+                parser = new DOMParser();
+                xmlDoc = parser.parseFromString(text, "text/xml");
+
+                //Create an array of the items
+                var items = xmlDoc.getElementsByTagName("item");
+                
+                var i = 0;
+
+                while(i < items.length && i < 11)
+                {
+                    if(isThereExactMatch)
+                    {
+                        if(items[i].getAttribute('id') !== this.state.searchItemsResults[0].getAttribute('id'))
+                        {
+                            this.state.searchItemsResults.push(items[i]);
+                            //console.log(items[i]);
+                        }
+                    }
+
+                    else
+                    {
+                        this.state.searchItemsResults.push(items[i]);
+                    }
+
+                    i++;
+                }
+            })
+            .catch(err => {
+                console.log(err);
+                return null;
+            });
+
+        this.setState({ isLoading: false, searchNameWasSubmitted: true, previouslySearchedName: this.state.searchName });
     }
 
 
-    async handleStartBuildingGraph() {
+    async handleStartBuildingGraph(item) {
 
-        this.setState({ isLoading: true, searchNameWasSubmitted: false });
+        console.log(item);
+
+        
+        //query for specific item id to get more info
+        await axios.get('https://www.boardgamegeek.com/xmlapi2/thing?id=' + item.getAttribute('id') /*'https://www.boardgamegeek.com/xmlapi2/thing?id=1406'*/)
+        .then((response) => {
+
+            var parser, xmlDoc;
+            var text = response.data;
+            
+            parser = new DOMParser();
+            xmlDoc = parser.parseFromString(text, "text/xml");
+        
+            console.log(xmlDoc);
+
+            this.setState({ nodeClicked: xmlDoc });
+
+            this.setState({text1: response.data, });
+        })
+        .catch(err => {
+            console.log(err);
+            return null;
+        });
+
+        this.setState({ isLoading: true, searchNameWasSubmitted: false/*, nodeClicked: item*/ });
 
         //Build the graph here
         await axios.get('https://www.boardgamegeek.com/xmlapi2/thing?id=1406')
@@ -167,13 +230,18 @@ class App extends Component {
         }
 
         else {
-            if(this.state.nodeClicked !== "")
-            {
+            if(this.state.nodeClicked !== null)
+            { 
+                //TODO: Cant find rating from item xml...
+                console.log('herererereer: ' + this.state.nodeClicked);
+                //console.log('balbablalbabl: ' + this.state.nodeClicked.getAttribute("rating"));
+
                 return (
                     <Row id="gameClickedOnGraph">
-                        <h4> Title of the Board Game Here</h4>
+                        <h4> { this.state.nodeClicked.getElementsByTagName('name')[0].getAttribute('value') } </h4>
                         <img 
-                            src="https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=350"
+                            src={ this.state.nodeClicked.getElementsByTagName("image")[0].childNodes[0].nodeValue }
+                            //src="https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=350"
                             alt="Board Game"
                         />
                         <p>
@@ -184,19 +252,13 @@ class App extends Component {
                 );
             }
 
-            else if (this.state.nodeClicked === "" && this.state.searchNameWasSubmitted) {
+            else if (this.state.nodeClicked === null && this.state.searchNameWasSubmitted) {
                 return (
                     <Row id="nameSearchResults">
                         <ul>
-                                {this.state.searchItemsResults.map(item => (
-                                    <li onClick={this.handleStartBuildingGraph} key={item}> {item} </li>
-                                  ))}
-                    
-                            {/*
-                            <li onClick={this.handleStartBuildingGraph}> 1st Game</li>
-                            <li onClick={this.handleStartBuildingGraph}> 2nd Game</li>
-                            <li onClick={this.handleStartBuildingGraph}> 3rd Game</li>
-                            */}
+                            { this.state.searchItemsResults.map(item => (
+                                <li onClick={() => this.handleStartBuildingGraph(item)} /*onClick={this.handleStartBuildingGraph}*/ key={item.getAttribute('id')}> {item.getElementsByTagName('name')[0].getAttribute('value')} </li>
+                            ))}
                         </ul>
                     </Row>  
                 );
@@ -213,8 +275,6 @@ class App extends Component {
         return (
             <div id="containerDiv">
                 <Col id="sideBar">
-                    { /*console.log(this.state.text1)*/ } 
-                    { /*console.log(this.state.text2)*/ }
                     <header>
                         Board Game Network
                     </header>
@@ -261,10 +321,10 @@ class App extends Component {
                     {this.displaySideBarInformation()}
 
                 </Col> 
-                <Col id="sigmaCol" className="App">
+                <Col id="sigmaCol">
 
                         {/*<div /*style={{ 'max-width': '400px', 'height': '400px', 'margin': 'auto' }} >*/}
-                        <Sigma style={{width:"400px", height:"400px"}}>
+                        <Sigma id="sigmaGraph" style={{ width:"100%", height:"100%" }}>
                             <LoadJSON path='data.json'/>
                         </Sigma>
                             {/* <script src="sigma.min.js"></script>
