@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import { Col, Row } from 'reactstrap';
-import { Sigma, LoadJSON, RandomizeNodePositions, RelativeSize, EdgeShapes, NodeShapes } from 'react-sigma';
+import { Sigma, RandomizeNodePositions, RelativeSize, EdgeShapes, NodeShapes } from 'react-sigma';
 import axios from 'axios';
 
 import './App.scss';
 
 //var sigma = require("sigma-js");
+
 
 
 class App extends Component {
@@ -15,6 +16,7 @@ class App extends Component {
             searchName: "",
             previouslySearchedName: "",
             selectedSearch: null,
+            previouslySelectedSearch: null,
             searchNameWasSubmitted: false,
             searchItemsResults: [],
             isLoading: false,
@@ -180,7 +182,7 @@ class App extends Component {
 
         this.setState({ searchNameWasSubmitted: false, previouslySearchedName: "", previousNodeClickedId: "" });
 
-        if(item.getAttribute('id') === this.state.gameIdPreviousGraphBuilt)
+        if(item.getAttribute('id') === this.state.gameIdPreviousGraphBuilt && this.state.selectedSearch === this.state.previouslySelectedSearch)
         {
             this.handleGraphNodeClick(null, item);
             return;
@@ -203,12 +205,50 @@ class App extends Component {
                 console.log(err);
                 return null;
             });
-            
+
+
+        await axios.get('https://www.boardgamegeek.com/xmlapi2/plays?username=mgperez')
+            .then((response) => {
+
+                var parseString = require('xml2js').parseString;
+                var xml = response.data;
+                parseString(xml, function (err, result) {
+                    console.log(result);
+                });
+
+            })
+            .catch(err => {
+                console.log(err);
+                return null;
+            });
+
+        
+        /*The only way I can think of to somehow get related games would be to:
+         - search for the main game id, with "&comments=1"
+         - if there are comments, get the usernames from those comments
+         - search for "plays" for all those usernames
+         - store all the games played by all those users and see the most relevant ones to show (more players played them, more rating, same game category/designer, etc)
+         
+         - Its a not bad solution, BUT, if there are no comments, there's NOTHING we can do
+        */
+        
+
+        //Trying to get the html from the bgg site, in order to try to get the related games ("Fans also like"):
+        /*
+        function reqListener () {
+            //console.log("blablablablabmaeihdjaksfnu");
+            console.log(this.responseText);
+        }
+        
+        var oReq = new XMLHttpRequest();
+        oReq.addEventListener("load", reqListener);
+        oReq.open("GET", "/https://www.boardgamegeek.com/boardgame/174430/gloomhaven");
+        oReq.send();
+        */
 
 
         let myGraph = {nodes:[], edges:[]};
         //let myGraph = {nodes:[{id:"1406", label:"Monopoly"}, {id:"1407", label:"Whatever"}], edges:[{id:"e1",source:"1406",target:"1407",label:"SEES"}]};
-
 
         //Just an example of a graph built out of the other searched results
         let items = this.state.searchItemsResults;
@@ -222,11 +262,11 @@ class App extends Component {
             }
         }
 
-        console.log(myGraph);
+        //console.log(myGraph);
 
         this.handleGraphNodeClick(null, item);
 
-        this.setState({ isLoading: false, graphJson: myGraph, isGraphBuilt: true, gameIdPreviousGraphBuilt: item.getAttribute('id') });
+        this.setState({ isLoading: false, graphJson: myGraph, isGraphBuilt: true, gameIdPreviousGraphBuilt: item.getAttribute('id'), previouslySelectedSearch: this.state.selectedSearch });
     }
 
 
