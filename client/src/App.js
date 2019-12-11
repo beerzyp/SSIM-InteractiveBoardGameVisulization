@@ -15,6 +15,7 @@ class App extends Component {
             searchName: "",
             previouslySearchedName: "",
             selectedSearch: null,
+            previouslySelectedSearch: null,
             searchNameWasSubmitted: false,
             searchItemsResults: [],
             isLoading: false,
@@ -180,7 +181,7 @@ class App extends Component {
 
         this.setState({ searchNameWasSubmitted: false, previouslySearchedName: "", previousNodeClickedId: "" });
 
-        if(item.getAttribute('id') === this.state.gameIdPreviousGraphBuilt)
+        if(item.getAttribute('id') === this.state.gameIdPreviousGraphBuilt && this.state.selectedSearch === this.state.previouslySelectedSearch)
         {
             this.handleGraphNodeClick(null, item);
             return;
@@ -203,6 +204,17 @@ class App extends Component {
                 console.log(err);
                 return null;
             });
+
+        { let content = $.get("copy_file.pl"); }
+
+        /*
+        my $url = "http://www.boardgamegeek.com/browse/boardgame";
+        my $content = get $url; # Gets the HTML page.
+        if (defined $content)
+        {
+            # Do something with content (which is the returned HTML) here.
+        }   
+        */ 
             
 
 
@@ -226,7 +238,7 @@ class App extends Component {
 
         this.handleGraphNodeClick(null, item);
 
-        this.setState({ isLoading: false, graphJson: myGraph, isGraphBuilt: true, gameIdPreviousGraphBuilt: item.getAttribute('id') });
+        this.setState({ isLoading: false, graphJson: myGraph, isGraphBuilt: true, gameIdPreviousGraphBuilt: item.getAttribute('id'), previouslySelectedSearch: this.state.selectedSearch });
     }
 
 
