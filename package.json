@@ -13,8 +13,5 @@
   "license": "ISC",
   "devDependencies": {
     "concurrently": "5.0.0"
-  },
-  "dependencies": {
-    "python-shell": "^1.0.8"
   }
 }

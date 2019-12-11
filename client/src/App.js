@@ -362,7 +362,10 @@ class App extends Component {
                     </h3>
                     <p>
                         Blablablabla, colocar nome do board game na search bar, blablabla, será criado um grafo com os board games
-                        relacionados para fácil visualização, blablabla
+                        relacionados para fácil visualização, blablabla.
+                    </p>
+                    <p>
+                        Yes, the loading wheel is pizza... (I'm hungry ok?!)
                     </p>
                     <form onSubmit={this.handleSubmit}>
                         <label>
