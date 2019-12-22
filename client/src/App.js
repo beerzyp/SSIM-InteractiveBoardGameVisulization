@@ -59,90 +59,36 @@ class App extends Component {
         
         this.setState({ isLoading: true, searchItemsResults: [], nodeClicked: null, previousNodeClickedId: "" });
 
-        var isThereExactMatch = false;
+        await axios.get('https://api.rawg.io/api/games?search="' + this.state.searchName + '"')
+        .then((response) => {
 
-        //Search for an exact match first
-        await axios.get('https://www.boardgamegeek.com/xmlapi2/search?query=' + this.state.searchName + '&type=boardgame&exact=1')
-            .then((response) => {
+            var items = response.data.results;
 
-                /*
-                var parseString = require('xml2js').parseString;
-                var xml = response.data;
-                parseString(xml, function (err, result) {
-                    console.log('Here here: ' + response.data);
-                    console.log('Here Here JSon: ' + result);
-                });
-                */
+            var i = 0;
+            while(i < items.length && i < 11)
+            {
+                this.state.searchItemsResults.push(items[i]);
+                i++;
+            }
+        })
+        .catch(err => {
+            console.log(err);
+            return null;
+        });
 
-                var parser, xmlDoc;
-                var text = response.data;
-                
-                parser = new DOMParser();
-                xmlDoc = parser.parseFromString(text, "text/xml");
-                
-                //Create an array of the items
-                var items = xmlDoc.getElementsByTagName("item");
-                
-                if(items.length !== 0)
-                {
-                    isThereExactMatch = true;
-                    this.state.searchItemsResults.push(items[0]);
-                }
-            })
-            .catch(err => {
-                console.log(err);
-                return null;
-            });
-
-        //Then search for all other matches
-        await axios.get('https://www.boardgamegeek.com/xmlapi2/search?query=' + this.state.searchName + '&type=boardgame')
-            .then((response) => {
-
-                var parser, xmlDoc;
-                var text = response.data;
-                
-                parser = new DOMParser();
-                xmlDoc = parser.parseFromString(text, "text/xml");
-
-                //Create an array of the items
-                var items = xmlDoc.getElementsByTagName("item");
-                
-                var i = 0;
-
-                while(i < items.length && i < 11)
-                {
-                    if(isThereExactMatch)
-                    {
-                        if(items[i].getAttribute('id') !== this.state.searchItemsResults[0].getAttribute('id'))
-                        {
-                            this.state.searchItemsResults.push(items[i]);
-                        }
-                    }
-
-                    else
-                    {
-                        this.state.searchItemsResults.push(items[i]);
-                    }
-
-                    i++;
-                }
-            })
-            .catch(err => {
-                console.log(err);
-                return null;
-            });
+        //TODO (if time is our friend): exclude DLCs from search results
 
         this.setState({ isLoading: false, searchNameWasSubmitted: true, previouslySearchedName: this.state.searchName });
     }
 
 
-    //Receives item in xmlDoc form
+    //Receives item in Json form (I believe)
     async handleGraphNodeClick(event, item) {
 
         var id = "";
         if(event === null)
         {
-            id = item.getAttribute('id');
+            id = item.id;
         }
         else
         {
@@ -156,23 +102,17 @@ class App extends Component {
 
         this.setState({ isLoading: true, searchNameWasSubmitted: false, previouslySearchedName: "" });
         
-        //query for specific item id to get more info
-        await axios.get('https://www.boardgamegeek.com/xmlapi2/thing?id=' + id/*item*//*item.getAttribute('id')*/ + '&stats=1')
+        //query for specific item id to get info
+        await axios.get('https://api.rawg.io/api/games/' + id)
         .then((response) => {
 
-            var parser, xmlDoc;
-            var text = response.data;
-            
-            parser = new DOMParser();
-            xmlDoc = parser.parseFromString(text, "text/xml");
-
-            this.setState({ nodeClicked: xmlDoc });
+            let item = response.data;
+            this.setState({ nodeClicked: item });
         })
         .catch(err => {
             console.log(err);
             return null;
         });
-        
 
         this.setState({ isLoading: false, previousNodeClickedId: id });
     }
@@ -182,7 +122,7 @@ class App extends Component {
 
         this.setState({ searchNameWasSubmitted: false, previouslySearchedName: "", previousNodeClickedId: "" });
 
-        if(item.getAttribute('id') === this.state.gameIdPreviousGraphBuilt && this.state.selectedSearch === this.state.previouslySelectedSearch)
+        if(item.id === this.state.gameIdPreviousGraphBuilt && this.state.selectedSearch === this.state.previouslySelectedSearch)
         {
             this.handleGraphNodeClick(null, item);
             return;
@@ -207,46 +147,6 @@ class App extends Component {
             });
 
 
-        await axios.get('https://www.boardgamegeek.com/xmlapi2/plays?username=mgperez')
-            .then((response) => {
-
-                var parseString = require('xml2js').parseString;
-                var xml = response.data;
-                parseString(xml, function (err, result) {
-                    console.log(result);
-                });
-
-            })
-            .catch(err => {
-                console.log(err);
-                return null;
-            });
-
-        
-        /*The only way I can think of to somehow get related games would be to:
-         - search for the main game id, with "&comments=1"
-         - if there are comments, get the usernames from those comments
-         - search for "plays" for all those usernames
-         - store all the games played by all those users and see the most relevant ones to show (more players played them, more rating, same game category/designer, etc)
-         
-         - Its a not bad solution, BUT, if there are no comments, there's NOTHING we can do
-        */
-        
-
-        //Trying to get the html from the bgg site, in order to try to get the related games ("Fans also like"):
-        /*
-        function reqListener () {
-            //console.log("blablablablabmaeihdjaksfnu");
-            console.log(this.responseText);
-        }
-        
-        var oReq = new XMLHttpRequest();
-        oReq.addEventListener("load", reqListener);
-        oReq.open("GET", "/https://www.boardgamegeek.com/boardgame/174430/gloomhaven");
-        oReq.send();
-        */
-
-
         let myGraph = {nodes:[], edges:[]};
         //let myGraph = {nodes:[{id:"1406", label:"Monopoly"}, {id:"1407", label:"Whatever"}], edges:[{id:"e1",source:"1406",target:"1407",label:"SEES"}]};
 
@@ -255,18 +155,16 @@ class App extends Component {
 
         for(let i = 0; i < items.length; i++)
         {
-            myGraph.nodes.push({id:items[i].getAttribute('id'), label:items[i].getElementsByTagName('name')[0].getAttribute('value')});
-            if(i !== 0)
-            {
-                myGraph.edges.push({id:'e' + items[i].getAttribute('id'), source: items[0].getAttribute('id'), target:items[i].getAttribute('id'), label:"SEES"});
-            }
+           myGraph.nodes.push({id:items[i].id, label:items[i].name});
+           if(i !== 0)
+           {
+               myGraph.edges.push({id:'e' + items[i].id, source: items[0].id, target:items[i].id, label:"SEES"});
+           }
         }
-
-        //console.log(myGraph);
 
         this.handleGraphNodeClick(null, item);
 
-        this.setState({ isLoading: false, graphJson: myGraph, isGraphBuilt: true, gameIdPreviousGraphBuilt: item.getAttribute('id'), previouslySelectedSearch: this.state.selectedSearch });
+        this.setState({ isLoading: false, graphJson: myGraph, isGraphBuilt: true, gameIdPreviousGraphBuilt: item.id, previouslySelectedSearch: this.state.selectedSearch });
     }
 
 
@@ -290,14 +188,23 @@ class App extends Component {
         {
             if(this.state.nodeClicked !== null)
             { 
-                let ratingAverage = parseFloat(this.state.nodeClicked.getElementsByTagName('average')[0].getAttribute('value')).toFixed(1);
-                let gameName = this.state.nodeClicked.getElementsByTagName('name')[0].getAttribute('value');
+                let gameRating = this.state.nodeClicked.rating;
+                if(gameRating === 0)
+                {
+                    gameRating = " Not Rated Yet";
+                }
+                else 
+                {
+                    gameRating = ' ' + gameRating + '/ 10';
+                }
+
+                let gameName = this.state.nodeClicked.name;  
 
                 let gameImage;
-                let gameImageTag = this.state.nodeClicked.getElementsByTagName("image");
-                if(gameImageTag.length > 0)
+                let gameImageTag = this.state.nodeClicked.background_image;
+                if(gameImageTag != null)
                 {
-                    gameImage = this.state.nodeClicked.getElementsByTagName("image")[0].childNodes[0].nodeValue;
+                    gameImage = gameImageTag;
                 }
 
                 return (
@@ -309,7 +216,7 @@ class App extends Component {
                         />
                         <p>
                             Rating:  
-                            {ratingAverage} / 10
+                            {gameRating}
                         </p>
 
                     </Row>  
@@ -321,7 +228,7 @@ class App extends Component {
                     <Row id="nameSearchResults">
                         <ul>
                             { this.state.searchItemsResults.map(item => (
-                                <li onClick={() => this.buildGraph(item)} key={item.getAttribute('id')}> {item.getElementsByTagName('name')[0].getAttribute('value')} </li>
+                                <li onClick={() => this.buildGraph(item)} key={item.id}> {item.name} </li>
                             ))}
                         </ul>
                     </Row>  
@@ -433,38 +340,6 @@ class App extends Component {
             </div>
         );
     }
-
-/*
-    async componentDidMount() {
-        
-        await axios.get('https://www.boardgamegeek.com/xmlapi2/thing?id=013')
-        .then((response) => {
-
-            var parseString = require('xml2js').parseString;
-            var xml = response.data;
-            parseString(xml, function (err, result) {
-                console.dir(result);
-            });
-
-            this.setState({text1: response.data});
-        })
-        .catch(err => {
-            console.log(err);
-            return null;
-        });
-
-
-        await axios.get('https://bgg-json.azurewebsites.net/thing/013')
-        .then((response) => {
-            this.setState({text2: response.data});
-        })
-        .catch(err => {
-            console.log(err);
-            return null;
-        });      
-
-    }
-    */
 
 }
 export default App;
