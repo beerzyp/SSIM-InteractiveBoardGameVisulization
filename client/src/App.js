@@ -162,7 +162,7 @@ class App extends Component {
 
         //TODO: Build the graph here  
               
-        await axios.get('https://api.rawg.io/api/games/' + item.id + '/suggested?page_size=2')
+        await axios.get('https://api.rawg.io/api/games/' + item.id + '/suggested?page_size=7')
             .then((response) => {
 
                 queryData = response.data;
@@ -235,14 +235,14 @@ class App extends Component {
 
             myGraph.nodes.push({id:item.id, label:item.name});          //push main game node to graph
 
-            console.log("In Algorithm 1: Put main game in graph nodes");
+            //console.log("In Algorithm 1: Put main game in graph nodes");
 
             let i = 0;
             while(i < queryData.results.length)
             {
                 //console.log(queryData.results[i]);
                 //console.log(queryData.results[i].id);
-                console.log("In Algorithm 1: Put each " + item.name + " related game on relatedGames array");
+                //console.log("In Algorithm 1: Put each " + item.name + " related game on relatedGames array");
 
                 let eachGame = queryData.results[i];
                 //eachGame.push(queryData.results[i]);
@@ -264,18 +264,27 @@ class App extends Component {
                     myGraph.edges.push({id:'e' + relatedGames[j].id, source: item.id, target:relatedGames[j].id, label:"SEES"});
                 }
                 */
+                //console.log(" ");
+                //console.log("In 1st phase of related games: ");
+                //console.log("   " + relatedGames[j].name + " (id: " + relatedGames[j].id + ")");
 
                 let doesNodeExist = false;
                 let doesEdgeExist = false;
 
                 for(let m = 0; m < myGraph.nodes.length; m++)
                 {
+                    //console.log("       for each existing node:");
+                    //console.log("           " + myGraph.nodes[m].label + "(id: " + myGraph.nodes[m].id + ")");
                     if(relatedGames[j].id === myGraph.nodes[m].id)
                     {
+                        //console.log("           relatedGames[j].id was equal to myGraph.nodes[m].id !");
                         for(let o = 0; o < myGraph.edges.length; o++)
                         {
-                            if(('e' + relatedGames[j].id + item.id === myGraph.edges[o].id) || ('e' + item.id + relatedGames[j].id === myGraph.edges[o].id))
+                            //console.log("               for each existing edge:");
+                            //console.log("                   " + myGraph.edges[o].id);
+                            if(('e' + relatedGames[j].id + 'e' + item.id === myGraph.edges[o].id) || ('e' + item.id + 'e' + relatedGames[j].id === myGraph.edges[o].id))
                             {  
+                                //console.log("                   current edge was equal to myGraph.nodes[m].id !");
                                 doesEdgeExist = true;
                                 break;
                             }
@@ -283,12 +292,17 @@ class App extends Component {
                         }
                         if(!doesEdgeExist)
                         {
+                            //console.log("           current edge doesn't exist. Adding edge to myGraph !");
                             //myGraph.edges.push({id:'e' + edgeIdCounter, source: item.id, target:myGraph.nodes[m].id, label:"SEES"});
-                            myGraph.edges.push({id: 'e' + item.id + myGraph.nodes[m].id, source: item.id, target: myGraph.nodes[m].id, label: "SEES"});
+                            myGraph.edges.push({id: 'e' + item.id + 'e' + myGraph.nodes[m].id, source: item.id, target: myGraph.nodes[m].id, label: "SEES"});
                             //edgeIdCounter++;
-                            doesNodeExist = true;
-                            break;
+                            //doesNodeExist = true;
+                            //break;
                         }
+
+                        doesNodeExist = true;
+                        break;
+ 
                         /*
                         //myGraph.edges.push({id:'e' + edgeIdCounter, source: item.id, target:myGraph.nodes[m].id, label:"SEES"});
                         myGraph.edges.push({id:'e' + item.id + myGraph.nodes[m].id, source: item.id, target:myGraph.nodes[m].id, label:"SEES"});
@@ -301,11 +315,13 @@ class App extends Component {
 
                 if(!doesNodeExist)
                 {
-                    console.log("In Algorithm 1:  For each " + item.name + " related game, put it on graph nodes");
+                    //console.log("       current node (" +  relatedGames[j].id + ") doesn't exist. Adding node to myGraph");
+
+                    //console.log("In Algorithm 1:  For each " + item.name + " related game, put it on graph nodes");
                     myGraph.nodes.push({id: relatedGames[j].id, label: relatedGames[j].name});
-                    console.log("In Algorithm 1:  For each " + item.name + " related game, put it on graph edges, connected to the main game");
+                    //console.log("In Algorithm 1:  For each " + item.name + " related game, put it on graph edges, connected to the main game");
                     //myGraph.edges.push({id:'e' + edgeIdCounter, source: item.id, target:relatedGames[j].id, label:"SEES"});
-                    myGraph.edges.push({id: 'e' + item.id + relatedGames[j].id, source: item.id, target: relatedGames[j].id, label: "SEES"});
+                    myGraph.edges.push({id: 'e' + item.id + 'e' + relatedGames[j].id, source: item.id, target: relatedGames[j].id, label: "SEES"});
                     //edgeIdCounter++;
                 }
 
@@ -319,14 +335,14 @@ class App extends Component {
 
                 let queryDataEachRelatedGame = [];
 
-                console.log("In Algorithm 1: query API for " + relatedGames[j].name + " related games");
+                //console.log("In Algorithm 1: query API for " + relatedGames[j].name + " related games");
 
-                await axios.get('https://api.rawg.io/api/games/' + relatedGames[j].id + '/suggested?page_size=2')
+                await axios.get('https://api.rawg.io/api/games/' + relatedGames[j].id + '/suggested?page_size=7')
                 .then((response) => {
 
-                    console.log("In Algorithm 1: Inside axios query for each " + relatedGames[j].name + " related games");
+                    //console.log("In Algorithm 1: Inside axios query for each " + relatedGames[j].name + " related games");
                     queryDataEachRelatedGame = response.data;
-                    console.log("In Algorithm 1: right after axios query for each " + relatedGames[j].name + " related games; got the following games: " + response.data.results);
+                    //console.log("In Algorithm 1: right after axios query for each " + relatedGames[j].name + " related games; got the following games: " + response.data.results);
 
 
                 })
@@ -335,9 +351,9 @@ class App extends Component {
                     return null;
                 });
 
-                console.log("In Algorithm 1: After axios query on related to related games, response.data: " + queryDataEachRelatedGame);
-                console.log("In Algorithm 1: After axios query on related to related games, response.data.results: " + queryDataEachRelatedGame.results);
-                console.log("In Algorithm 1: After axios query on related to related games, response.data.results[0].name: " + queryDataEachRelatedGame.results[0].name);
+                //console.log("In Algorithm 1: After axios query on related to related games, response.data: " + queryDataEachRelatedGame);
+                //console.log("In Algorithm 1: After axios query on related to related games, response.data.results: " + queryDataEachRelatedGame.results);
+                //console.log("In Algorithm 1: After axios query on related to related games, response.data.results[0].name: " + queryDataEachRelatedGame.results[0].name);
 
 
 
@@ -348,7 +364,7 @@ class App extends Component {
                 while(k < queryDataEachRelatedGame.results.length)
                 { 
 
-                    console.log("In Algorithm 1: Put each " + relatedGames[j].name + " related game on eachGameRelatedGames array");
+                    //console.log("In Algorithm 1: Put each " + relatedGames[j].name + " related game on eachGameRelatedGames array");
 
                     //console.log(queryData.results[i]);
                     //console.log(queryData.results[i].id);
@@ -356,18 +372,23 @@ class App extends Component {
                     let eachGame = queryDataEachRelatedGame.results[k];
                     //eachGame.push(queryData.results[i]);
                     
-                    console.log("In Algorithm 1: EachGame (related to related): " + eachGame);
+                    //console.log("In Algorithm 1: EachGame (related to related): " + eachGame);
 
                     eachGameRelatedGames.push(eachGame);
 
-                    console.log("In Algorithm 1: eachGameRelatedGames: " + eachGameRelatedGames);
-                    console.log("In Algorithm 1: eachGameRelatedGames[k]: " + eachGameRelatedGames[k]);
-                    console.log("In Algorithm 1: eachGameRelatedGames[k].name: " + eachGameRelatedGames[k].name);
+                    //console.log("In Algorithm 1: eachGameRelatedGames: " + eachGameRelatedGames);
+                    //console.log("In Algorithm 1: eachGameRelatedGames[k]: " + eachGameRelatedGames[k]);
+                    //console.log("In Algorithm 1: eachGameRelatedGames[k].name: " + eachGameRelatedGames[k].name);
 
                     k++;
                 }
 
-                for(let l = 0; l < eachGameRelatedGames.length; l++) {
+                for(let l = 0; l < eachGameRelatedGames.length; l++) 
+                {
+
+                    //console.log(" ");
+                   // console.log("   In 2nd phase of related games: ");
+                    //console.log("       " + eachGameRelatedGames[l].name + " (id: " + eachGameRelatedGames[l].id + ")");
 
                     let doesNodeExistPhaseTwo = false;
                     let doesEdgeExistPhaseTwo = false;
@@ -375,25 +396,36 @@ class App extends Component {
 
                     for(let n = 0; n < myGraph.nodes.length; n++)
                     {
+                        //console.log("           for each existing node:");
+                        //console.log("              " + myGraph.nodes[n].label + "(id: " + myGraph.nodes[n].id + ")");
                         if(eachGameRelatedGames[l].id === myGraph.nodes[n].id)
                         {
+                            //console.log("               eachGameRelatedGames[l].id was equal to myGraph.nodes[n].id !");
                             for(let p = 0; p < myGraph.edges.length; p++)
                             {
-                                if(('e' + eachGameRelatedGames[l].id + relatedGames[j].id === myGraph.edges[p].id) || ('e' + relatedGames[j].id + eachGameRelatedGames[l].id === myGraph.edges[p].id))
+                               // console.log("                   for each existing edge:");
+                                //.log("                   " + myGraph.edges[p].id);
+                                if(('e' + eachGameRelatedGames[l].id + 'e' + relatedGames[j].id === myGraph.edges[p].id) || ('e' + relatedGames[j].id + 'e' + eachGameRelatedGames[l].id === myGraph.edges[p].id))
                                 {  
+                                    console.log("                       current edge was equal to myGraph.nodes[n].id !");
                                     doesEdgeExistPhaseTwo = true;
                                     break;
                                 }
-    
                             }
                             if(!doesEdgeExistPhaseTwo)
                             {
+                                //console.log("               current edge doesn't exist. Adding edge to myGraph !");
+
                                 //myGraph.edges.push({id:'e' + edgeIdCounter, source: item.id, target:myGraph.nodes[m].id, label:"SEES"});
-                                myGraph.edges.push({id: 'e' + relatedGames[j].id + myGraph.nodes[n].id, source: relatedGames[j].id, target: myGraph.nodes[n].id, label: "SEES"});
+                                myGraph.edges.push({id: 'e' + relatedGames[j].id + 'e' + myGraph.nodes[n].id, source: relatedGames[j].id, target: myGraph.nodes[n].id, label: "SEES"});
                                 //edgeIdCounter++;
-                                doesNodeExistPhaseTwo = true;
-                                break;
+                                //doesNodeExistPhaseTwo = true;
+                                //break;
                             }
+
+                            doesNodeExistPhaseTwo = true;
+                            break;
+
 
 
                             /*
@@ -408,12 +440,14 @@ class App extends Component {
     
                     if(!doesNodeExistPhaseTwo)
                     {
+                        //console.log("           current node (" +  eachGameRelatedGames[l].id + ") doesn't exist. Adding node to myGraph");
 
-                        console.log("In Algorithm 1:  For each " + relatedGames[j].name + " related game, put it on graph nodes");
+
+                        //console.log("In Algorithm 1:  For each " + relatedGames[j].name + " related game, put it on graph nodes");
                         myGraph.nodes.push({id: eachGameRelatedGames[l].id, label: eachGameRelatedGames[l].name});
-                        console.log("In Algorithm 1:  For each " + relatedGames[j].name + " related game, put it on graph edges, connected to the" + relatedGames[j].name + "game");
+                        //console.log("In Algorithm 1:  For each " + relatedGames[j].name + " related game, put it on graph edges, connected to the" + relatedGames[j].name + "game");
                         //myGraph.edges.push({id:'e' + edgeIdCounter, source: relatedGames[j].id, target:eachGameRelatedGames[l].id, label:"SEES"});   
-                        myGraph.edges.push({id: 'e' + relatedGames[j].id + eachGameRelatedGames[l].id, source: relatedGames[j].id, target: eachGameRelatedGames[l].id, label: "SEES"});   
+                        myGraph.edges.push({id: 'e' + relatedGames[j].id + 'e' + eachGameRelatedGames[l].id, source: relatedGames[j].id, target: eachGameRelatedGames[l].id, label: "SEES"});   
                         //edgeIdCounter++; 
                     }
 
