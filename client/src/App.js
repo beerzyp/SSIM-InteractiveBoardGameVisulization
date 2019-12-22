@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Col, Row } from 'reactstrap';
-import { Sigma, SigmaEnableWebGL, RandomizeNodePositions, RelativeSize, EdgeShapes, NodeShapes } from 'react-sigma';
+import { Sigma, RandomizeNodePositions, RelativeSize, EdgeShapes, NodeShapes } from 'react-sigma';
+import ForceLink from 'react-sigma/lib/ForceLink'
 import axios from 'axios';
 
 import './App.scss';
@@ -158,7 +159,7 @@ class App extends Component {
         let myGraph = { nodes:[], edges:[] };       //Initialize graph variable
         let queryData = [];                         //Initialize variable that will hold the query response
               
-        await axios.get('https://api.rawg.io/api/games/' + item.id + '/suggested?page_size=15')
+        await axios.get('https://api.rawg.io/api/games/' + item.id + '/suggested?page_size=18')
             .then((response) => {
 
                 queryData = response.data;          //queryData holds the related games to the main game
@@ -224,7 +225,7 @@ class App extends Component {
 
                 let queryDataEachRelatedGame = [];                      //Initialize variable that will hold the query response    
 
-                await axios.get('https://api.rawg.io/api/games/' + relatedGames[j].id + '/suggested?page_size=15')
+                await axios.get('https://api.rawg.io/api/games/' + relatedGames[j].id + '/suggested?page_size=18')
                 .then((response) => {
 
                     queryDataEachRelatedGame = response.data;           //queryDataEachRelatedGame holds the related games to each of the main game's related games
@@ -421,6 +422,7 @@ class App extends Component {
                     <RandomizeNodePositions/>
                     <EdgeShapes default="tapered"/>
                     <NodeShapes default="star"/>
+                    <ForceLink easing="cubicInOut" gravity={2} nodeSiblingsAngleMin={1} /* this attracts nodes connected with edges of positive weight edgeWeightInfluence={2}*//>
                 </Sigma>
             )
         }
