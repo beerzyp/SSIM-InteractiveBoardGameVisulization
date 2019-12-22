@@ -209,124 +209,235 @@ class App extends Component {
                 return null;
             });
 
+        //let allExistingNodes = [];              //Array that has all nodes that have been put in the graph so far.
 
 
-            if(queryData.results.length === 0)
+        if(queryData.results.length === 0)
+        {
+            //let myGraph = {nodes:[], edges:[]};
+
+            //this.setState({ graphJson: myGraph });
+            console.log("There are no related games for this game :(");
+            console.log("Please try another game!");
+            alert("There are no related games for this game :(");
+
+            //return myGraph;
+        }
+
+        else
+        {
+            console.log("Starting Algorithm 1");
+
+            let relatedGames = [];
+
+            //let edgeIdCounter = 1;
+
+
+            myGraph.nodes.push({id:item.id, label:item.name});          //push main game node to graph
+
+            console.log("In Algorithm 1: Put main game in graph nodes");
+
+            let i = 0;
+            while(i < queryData.results.length)
             {
-                //let myGraph = {nodes:[], edges:[]};
+                //console.log(queryData.results[i]);
+                //console.log(queryData.results[i].id);
+                console.log("In Algorithm 1: Put each " + item.name + " related game on relatedGames array");
 
-                //this.setState({ graphJson: myGraph });
-                console.log("There are no related games for this game :(");
-                console.log("Please try another game!");
-                alert("There are no related games for this game :(");
+                let eachGame = queryData.results[i];
+                //eachGame.push(queryData.results[i]);
 
-                //return myGraph;
+                relatedGames.push(eachGame);
+
+                i++;
             }
 
-            else
+            //myGraph.nodes.push({id:item.id, label:item.name});
+
+            
+            for(let j = 0; j < relatedGames.length; j++)
             {
-                console.log("Starting Algorithm 1");
-
-                let relatedGames = [];
-
-                let i = 0;
-                while(i < queryData.results.length)
+                /*
+                for(let m = 0; m < allExistingNodes.length; m++)
                 {
-                    //console.log(queryData.results[i]);
-                    //console.log(queryData.results[i].id);
-                    console.log("In Algorithm 1: Put each " + item.name + " related game on relatedGames array");
+                    if(relatedGames[j].id === allExistingNodes[m].id);
+                    myGraph.edges.push({id:'e' + relatedGames[j].id, source: item.id, target:relatedGames[j].id, label:"SEES"});
+                }
+                */
 
-                    let eachGame = queryData.results[i];
-                    //eachGame.push(queryData.results[i]);
+                let doesNodeExist = false;
+                let doesEdgeExist = false;
 
-                    relatedGames.push(eachGame);
+                for(let m = 0; m < myGraph.nodes.length; m++)
+                {
+                    if(relatedGames[j].id === myGraph.nodes[m].id)
+                    {
+                        for(let o = 0; o < myGraph.edges.length; o++)
+                        {
+                            if(('e' + relatedGames[j].id + item.id === myGraph.edges[o].id) || ('e' + item.id + relatedGames[j].id === myGraph.edges[o].id))
+                            {  
+                                doesEdgeExist = true;
+                                break;
+                            }
 
-                    i++;
+                        }
+                        if(!doesEdgeExist)
+                        {
+                            //myGraph.edges.push({id:'e' + edgeIdCounter, source: item.id, target:myGraph.nodes[m].id, label:"SEES"});
+                            myGraph.edges.push({id: 'e' + item.id + myGraph.nodes[m].id, source: item.id, target: myGraph.nodes[m].id, label: "SEES"});
+                            //edgeIdCounter++;
+                            doesNodeExist = true;
+                            break;
+                        }
+                        /*
+                        //myGraph.edges.push({id:'e' + edgeIdCounter, source: item.id, target:myGraph.nodes[m].id, label:"SEES"});
+                        myGraph.edges.push({id:'e' + item.id + myGraph.nodes[m].id, source: item.id, target:myGraph.nodes[m].id, label:"SEES"});
+                        //edgeIdCounter++;
+                        doesNodeExist = true;
+                        break;
+                        */
+                    }
                 }
 
-                myGraph.nodes.push({id:item.id, label:item.name});
-
-                console.log("In Algorithm 1: Put main game in graph nodes");
-
-                for(let j = 0; j < relatedGames.length; j++)
+                if(!doesNodeExist)
                 {
                     console.log("In Algorithm 1:  For each " + item.name + " related game, put it on graph nodes");
-                    myGraph.nodes.push({id:relatedGames[j].id, label:relatedGames[j].name});
+                    myGraph.nodes.push({id: relatedGames[j].id, label: relatedGames[j].name});
                     console.log("In Algorithm 1:  For each " + item.name + " related game, put it on graph edges, connected to the main game");
-                    myGraph.edges.push({id:'e' + relatedGames[j].id, source: item.id, target:relatedGames[j].id, label:"SEES"});
-
-                    let queryDataEachRelatedGame = [];
-
-                    console.log("In Algorithm 1: query API for " + relatedGames[j].name + " related games");
-
-                    await axios.get('https://api.rawg.io/api/games/' + relatedGames[j].id + '/suggested?page_size=2')
-                    .then((response) => {
-
-                        console.log("In Algorithm 1: Inside axios query for each " + relatedGames[j].name + " related games");
-                        queryDataEachRelatedGame = response.data;
-                        console.log("In Algorithm 1: right after axios query for each " + relatedGames[j].name + " related games; got the following games: " + response.data.results);
-
-
-                    })
-                    .catch(err => {
-                        console.log(err);
-                        return null;
-                    });
-
-                    console.log("In Algorithm 1: After axios query on related to related games, response.data: " + queryDataEachRelatedGame);
-                    console.log("In Algorithm 1: After axios query on related to related games, response.data.results: " + queryDataEachRelatedGame.results);
-                    console.log("In Algorithm 1: After axios query on related to related games, response.data.results[0].name: " + queryDataEachRelatedGame.results[0].name);
-
-
-
-
-                    let eachGameRelatedGames = [];
-
-                    let k = 0;
-                    while(k < queryDataEachRelatedGame.results.length)
-                    { 
-
-                        console.log("In Algorithm 1: Put each " + relatedGames[j].name + " related game on eachGameRelatedGames array");
-
-                        //console.log(queryData.results[i]);
-                        //console.log(queryData.results[i].id);
-
-                        let eachGame = queryDataEachRelatedGame.results[k];
-                        //eachGame.push(queryData.results[i]);
-                        
-                        console.log("In Algorithm 1: EachGame (related to related): " + eachGame);
-
-                        eachGameRelatedGames.push(eachGame);
-
-                        console.log("In Algorithm 1: eachGameRelatedGames: " + eachGameRelatedGames);
-                        console.log("In Algorithm 1: eachGameRelatedGames[k]: " + eachGameRelatedGames[k]);
-                        console.log("In Algorithm 1: eachGameRelatedGames[k].name: " + eachGameRelatedGames[k].name);
-
-
-
-                        k++;
-                    }
-
-                    for(let l = 0; l < eachGameRelatedGames.length; l++) {
-
-                        console.log("In Algorithm 1:  For each " + relatedGames[j].name + " related game, put it on graph nodes");
-                        myGraph.nodes.push({id:eachGameRelatedGames[l].id, label:eachGameRelatedGames[l].name});
-                        console.log("In Algorithm 1:  For each " + relatedGames[j].name + " related game, put it on graph edges, connected to the" + relatedGames[j].name + "game");
-                        myGraph.edges.push({id:'e' + eachGameRelatedGames[l].id, source: relatedGames[j].id, target:eachGameRelatedGames[l].id, label:"SEES"});    
-                    }
-                   
-
+                    //myGraph.edges.push({id:'e' + edgeIdCounter, source: item.id, target:relatedGames[j].id, label:"SEES"});
+                    myGraph.edges.push({id: 'e' + item.id + relatedGames[j].id, source: item.id, target: relatedGames[j].id, label: "SEES"});
+                    //edgeIdCounter++;
                 }
 
+/*
+                console.log("In Algorithm 1:  For each " + item.name + " related game, put it on graph nodes");
+                myGraph.nodes.push({id:relatedGames[j].id, label:relatedGames[j].name});
+                console.log("In Algorithm 1:  For each " + item.name + " related game, put it on graph edges, connected to the main game");
+                myGraph.edges.push({id:'e' + edgeIdCounter, source: item.id, target:relatedGames[j].id, label:"SEES"});
+                edgeIdCounter++;
+                */
+
+                let queryDataEachRelatedGame = [];
+
+                console.log("In Algorithm 1: query API for " + relatedGames[j].name + " related games");
+
+                await axios.get('https://api.rawg.io/api/games/' + relatedGames[j].id + '/suggested?page_size=2')
+                .then((response) => {
+
+                    console.log("In Algorithm 1: Inside axios query for each " + relatedGames[j].name + " related games");
+                    queryDataEachRelatedGame = response.data;
+                    console.log("In Algorithm 1: right after axios query for each " + relatedGames[j].name + " related games; got the following games: " + response.data.results);
 
 
-                console.log("In Algorithm 1: Success!");
-                console.log(myGraph);
-                //return myGraph;
+                })
+                .catch(err => {
+                    console.log(err);
+                    return null;
+                });
+
+                console.log("In Algorithm 1: After axios query on related to related games, response.data: " + queryDataEachRelatedGame);
+                console.log("In Algorithm 1: After axios query on related to related games, response.data.results: " + queryDataEachRelatedGame.results);
+                console.log("In Algorithm 1: After axios query on related to related games, response.data.results[0].name: " + queryDataEachRelatedGame.results[0].name);
+
+
+
+
+                let eachGameRelatedGames = [];
+
+                let k = 0;
+                while(k < queryDataEachRelatedGame.results.length)
+                { 
+
+                    console.log("In Algorithm 1: Put each " + relatedGames[j].name + " related game on eachGameRelatedGames array");
+
+                    //console.log(queryData.results[i]);
+                    //console.log(queryData.results[i].id);
+
+                    let eachGame = queryDataEachRelatedGame.results[k];
+                    //eachGame.push(queryData.results[i]);
+                    
+                    console.log("In Algorithm 1: EachGame (related to related): " + eachGame);
+
+                    eachGameRelatedGames.push(eachGame);
+
+                    console.log("In Algorithm 1: eachGameRelatedGames: " + eachGameRelatedGames);
+                    console.log("In Algorithm 1: eachGameRelatedGames[k]: " + eachGameRelatedGames[k]);
+                    console.log("In Algorithm 1: eachGameRelatedGames[k].name: " + eachGameRelatedGames[k].name);
+
+                    k++;
+                }
+
+                for(let l = 0; l < eachGameRelatedGames.length; l++) {
+
+                    let doesNodeExistPhaseTwo = false;
+                    let doesEdgeExistPhaseTwo = false;
+
+
+                    for(let n = 0; n < myGraph.nodes.length; n++)
+                    {
+                        if(eachGameRelatedGames[l].id === myGraph.nodes[n].id)
+                        {
+                            for(let p = 0; p < myGraph.edges.length; p++)
+                            {
+                                if(('e' + eachGameRelatedGames[l].id + relatedGames[j].id === myGraph.edges[p].id) || ('e' + relatedGames[j].id + eachGameRelatedGames[l].id === myGraph.edges[p].id))
+                                {  
+                                    doesEdgeExistPhaseTwo = true;
+                                    break;
+                                }
+    
+                            }
+                            if(!doesEdgeExistPhaseTwo)
+                            {
+                                //myGraph.edges.push({id:'e' + edgeIdCounter, source: item.id, target:myGraph.nodes[m].id, label:"SEES"});
+                                myGraph.edges.push({id: 'e' + relatedGames[j].id + myGraph.nodes[n].id, source: relatedGames[j].id, target: myGraph.nodes[n].id, label: "SEES"});
+                                //edgeIdCounter++;
+                                doesNodeExistPhaseTwo = true;
+                                break;
+                            }
+
+
+                            /*
+                            //myGraph.edges.push({id:'e' + edgeIdCounter, source: relatedGames[j].id, target:myGraph.nodes[n].id, label:"SEES"});
+                            myGraph.edges.push({id: 'e' + relatedGames[j].id + myGraph.nodes[n].id, source: relatedGames[j].id, target: myGraph.nodes[n].id, label: "SEES"});
+                            //edgeIdCounter++;
+                            doesNodeExistPhaseTwo = true;
+                            break;
+                            */
+                        }
+                    }
+    
+                    if(!doesNodeExistPhaseTwo)
+                    {
+
+                        console.log("In Algorithm 1:  For each " + relatedGames[j].name + " related game, put it on graph nodes");
+                        myGraph.nodes.push({id: eachGameRelatedGames[l].id, label: eachGameRelatedGames[l].name});
+                        console.log("In Algorithm 1:  For each " + relatedGames[j].name + " related game, put it on graph edges, connected to the" + relatedGames[j].name + "game");
+                        //myGraph.edges.push({id:'e' + edgeIdCounter, source: relatedGames[j].id, target:eachGameRelatedGames[l].id, label:"SEES"});   
+                        myGraph.edges.push({id: 'e' + relatedGames[j].id + eachGameRelatedGames[l].id, source: relatedGames[j].id, target: eachGameRelatedGames[l].id, label: "SEES"});   
+                        //edgeIdCounter++; 
+                    }
+
+                    /*
+                    console.log("In Algorithm 1:  For each " + relatedGames[j].name + " related game, put it on graph nodes");
+                    myGraph.nodes.push({id:eachGameRelatedGames[l].id, label:eachGameRelatedGames[l].name});
+                    console.log("In Algorithm 1:  For each " + relatedGames[j].name + " related game, put it on graph edges, connected to the" + relatedGames[j].name + "game");
+                    myGraph.edges.push({id:'e' + edgeIdCounter, source: relatedGames[j].id, target:eachGameRelatedGames[l].id, label:"SEES"});   
+                    edgeIdCounter++; 
+                    */
+                }
+                
+
             }
 
-                //console.log(result);
-            //});
+
+
+            console.log("In Algorithm 1: Success!");
+            console.log(myGraph);
+            //return myGraph;
+        }
+
+            //console.log(result);
+        //});
                 
 
 
