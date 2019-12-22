@@ -162,7 +162,7 @@ class App extends Component {
 
         //TODO: Build the graph here  
               
-        await axios.get('https://api.rawg.io/api/games/' + item.id + '/suggested?page_size=15')
+        await axios.get('https://api.rawg.io/api/games/' + item.id + '/suggested?page_size=2')
             .then((response) => {
 
                 queryData = response.data;
@@ -225,14 +225,16 @@ class App extends Component {
 
             else
             {
+                console.log("Starting Algorithm 1");
 
                 let relatedGames = [];
 
                 let i = 0;
                 while(i < queryData.results.length)
                 {
-                    console.log(queryData.results[i]);
-                    console.log(queryData.results[i].id);
+                    //console.log(queryData.results[i]);
+                    //console.log(queryData.results[i].id);
+                    console.log("In Algorithm 1: Put each " + item.name + " related game on relatedGames array");
 
                     let eachGame = queryData.results[i];
                     //eachGame.push(queryData.results[i]);
@@ -244,17 +246,81 @@ class App extends Component {
 
                 myGraph.nodes.push({id:item.id, label:item.name});
 
+                console.log("In Algorithm 1: Put main game in graph nodes");
+
                 for(let j = 0; j < relatedGames.length; j++)
                 {
-                    console.log("HEREHERERH");
+                    console.log("In Algorithm 1:  For each " + item.name + " related game, put it on graph nodes");
                     myGraph.nodes.push({id:relatedGames[j].id, label:relatedGames[j].name});
+                    console.log("In Algorithm 1:  For each " + item.name + " related game, put it on graph edges, connected to the main game");
                     myGraph.edges.push({id:'e' + relatedGames[j].id, source: item.id, target:relatedGames[j].id, label:"SEES"});
+
+                    let queryDataEachRelatedGame = [];
+
+                    console.log("In Algorithm 1: query API for " + relatedGames[j].name + " related games");
+
+                    await axios.get('https://api.rawg.io/api/games/' + relatedGames[j].id + '/suggested?page_size=2')
+                    .then((response) => {
+
+                        console.log("In Algorithm 1: Inside axios query for each " + relatedGames[j].name + " related games");
+                        queryDataEachRelatedGame = response.data;
+                        console.log("In Algorithm 1: right after axios query for each " + relatedGames[j].name + " related games; got the following games: " + response.data.results);
+
+
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        return null;
+                    });
+
+                    console.log("In Algorithm 1: After axios query on related to related games, response.data: " + queryDataEachRelatedGame);
+                    console.log("In Algorithm 1: After axios query on related to related games, response.data.results: " + queryDataEachRelatedGame.results);
+                    console.log("In Algorithm 1: After axios query on related to related games, response.data.results[0].name: " + queryDataEachRelatedGame.results[0].name);
+
+
+
+
+                    let eachGameRelatedGames = [];
+
+                    let k = 0;
+                    while(k < queryDataEachRelatedGame.results.length)
+                    { 
+
+                        console.log("In Algorithm 1: Put each " + relatedGames[j].name + " related game on eachGameRelatedGames array");
+
+                        //console.log(queryData.results[i]);
+                        //console.log(queryData.results[i].id);
+
+                        let eachGame = queryDataEachRelatedGame.results[k];
+                        //eachGame.push(queryData.results[i]);
+                        
+                        console.log("In Algorithm 1: EachGame (related to related): " + eachGame);
+
+                        eachGameRelatedGames.push(eachGame);
+
+                        console.log("In Algorithm 1: eachGameRelatedGames: " + eachGameRelatedGames);
+                        console.log("In Algorithm 1: eachGameRelatedGames[k]: " + eachGameRelatedGames[k]);
+                        console.log("In Algorithm 1: eachGameRelatedGames[k].name: " + eachGameRelatedGames[k].name);
+
+
+
+                        k++;
+                    }
+
+                    for(let l = 0; l < eachGameRelatedGames.length; l++) {
+
+                        console.log("In Algorithm 1:  For each " + relatedGames[j].name + " related game, put it on graph nodes");
+                        myGraph.nodes.push({id:eachGameRelatedGames[l].id, label:eachGameRelatedGames[l].name});
+                        console.log("In Algorithm 1:  For each " + relatedGames[j].name + " related game, put it on graph edges, connected to the" + relatedGames[j].name + "game");
+                        myGraph.edges.push({id:'e' + eachGameRelatedGames[l].id, source: relatedGames[j].id, target:eachGameRelatedGames[l].id, label:"SEES"});    
+                    }
+                   
+
                 }
 
 
 
-
-                console.log("Success!");
+                console.log("In Algorithm 1: Success!");
                 console.log(myGraph);
                 //return myGraph;
             }
@@ -416,8 +482,8 @@ class App extends Component {
     displayGraph() {
         if(this.state.isGraphBuilt) {
             return (
-                <Sigma id="sigmaGraph" style={{ width:"100%", height:"100%" }} onClickNode={this.handleGraphNodeClick} graph={this.state.graphJson} settings={{drawEdges: true, clone: false}}>
-                    <RelativeSize initialSize={15}/>
+                <Sigma id="sigmaGraph" style={{ width:"100%", height:"100%" }} onClickNode={this.handleGraphNodeClick} graph={this.state.graphJson} settings={{drawEdges: true, clone: true}}>
+                    <RelativeSize initialSize={300}/>
                     <RandomizeNodePositions/>
                     <EdgeShapes default="tapered"/>
                     <NodeShapes default="star"/>
