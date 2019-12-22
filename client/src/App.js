@@ -10,12 +10,12 @@ import './App.scss';
 
 
 class App extends Component {
-    constructor(props) {
+    constructor(props) {    
         super(props);
         this.state = {
             searchName: "",
             previouslySearchedName: "",
-            selectedSearch: null,
+            selectedSearch: "Algorithm 1",
             previouslySelectedSearch: null,
             searchNameWasSubmitted: false,
             searchItemsResults: [],
@@ -33,6 +33,8 @@ class App extends Component {
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleGraphNodeClick = this.handleGraphNodeClick.bind(this);
         this.buildGraph = this.buildGraph.bind(this);
+        this.buildGraphAlgorithm1 = this.buildGraphAlgorithm1.bind(this);
+        this.buildGraphAlgorithm2 = this.buildGraphAlgorithm2.bind(this);
 
         this.displaySideBarInformation = this.displaySideBarInformation.bind(this);
         this.displayGraph = this.displayGraph.bind(this);
@@ -118,7 +120,7 @@ class App extends Component {
     }
 
 
-    async buildGraph(item) {
+    /*async*/ buildGraph(item) {
 
         this.setState({ searchNameWasSubmitted: false, previouslySearchedName: "", previousNodeClickedId: "" });
 
@@ -128,17 +130,62 @@ class App extends Component {
             return;
         }
 
+        //this.setState({ isLoading: true, isGraphBuilt: false });
+
+
+        //let myGraph = [];
+
+        if(this.state.selectedSearch === "Algorithm 1")
+        {
+            console.log("Algorithm 1");
+            /*myGraph = */this.buildGraphAlgorithm1(item);
+        }
+        else if(this.state.selectedSearch === "Algorithm 2")
+        {
+            console.log("Algorithm 2");
+           /*myGraph = */this.buildGraphAlgorithm2(item);
+        }
+
+        //this.handleGraphNodeClick(null, item);
+
+        //this.setState({ isLoading: false, graphJson: myGraph, isGraphBuilt: true, gameIdPreviousGraphBuilt: item.id, previouslySelectedSearch: this.state.selectedSearch });
+    }
+
+
+    async buildGraphAlgorithm1(item) {
+
         this.setState({ isLoading: true, isGraphBuilt: false });
 
-        //TODO: Build the graph here        
-        await axios.get('https://www.boardgamegeek.com/xmlapi2/thing?id=1406')
+        let myGraph = {nodes:[], edges:[]};
+
+        //TODO: Build the graph here  
+              
+        await axios.get('https://api.rawg.io/api/games/' + item.id + '/suggested?page_size=15')
             .then((response) => {
 
-                var parseString = require('xml2js').parseString;
-                var xml = response.data;
-                parseString(xml, function (err, result) {
+
+                //var parseString = require('xml2js').parseString;
+                //var xml = response.data;
+                //parseString(xml, function (err, result) {
+                console.log("someth9ing somethign" + item.name);
+                console.log("  something:" + response.data.results);
+                if(response.data.results.length === 0)
+                {
+                    //let myGraph = {nodes:[], edges:[]};
+
+                    this.setState({ graphJson: myGraph });
+                    console.log("There are no related games for this game :(");
+                    console.log("Please try another game!");
+                    alert("There are no related games for this game :(");
+                    return myGraph;
+                }
+                else{
+                    console.log("Success!");
+                    return myGraph;
+                }
+
                     //console.log(result);
-                });
+                //});
 
             })
             .catch(err => {
@@ -146,25 +193,98 @@ class App extends Component {
                 return null;
             });
 
+        this.handleGraphNodeClick(null, item);
 
+        this.setState({ isLoading: false, graphJson: myGraph, isGraphBuilt: true, gameIdPreviousGraphBuilt: item.id, previouslySelectedSearch: this.state.selectedSearch });
+            
+    }
+
+
+    async buildGraphAlgorithm2(item) {
+
+        this.setState({ isLoading: true, isGraphBuilt: false });
+
+        let myGraph = [];
+
+        //TODO: Build the graph here  
+        await axios.get('https://api.rawg.io/api/games/' + item.id + '/suggested?page_size=15')
+            .then((response) => {
+
+                myGraph = {nodes:[], edges:[]};
+                //let myGraph = {nodes:[{id:"1406", label:"Monopoly"}, {id:"1407", label:"Whatever"}], edges:[{id:"e1",source:"1406",target:"1407",label:"SEES"}]};
+
+                //Just an example of a graph built out of the other searched results
+                let items = this.state.searchItemsResults;
+
+                console.log("My Graph:" + myGraph.nodes);
+
+                for(let i = 0; i < items.length; i++)
+                {
+                    myGraph.nodes.push({id:items[i].id, label:items[i].name});
+                    if(i !== 0)
+                    {
+                        myGraph.edges.push({id:'e' + items[i].id, source: items[0].id, target:items[i].id, label:"SEES"});
+                    }
+                }
+
+                console.log("My Graph:" + myGraph.nodes);
+
+                return myGraph;
+
+
+
+                //var parseString = require('xml2js').parseString;
+                //var xml = response.data;
+                //parseString(xml, function (err, result) {
+                /*if(response.data.results === [])
+                {
+                    let myGraph = {nodes:[], edges:[]};
+
+                    this.setState({ graphJson: myGraph });
+                    console.log("There are no related games for this game :(");
+                    console.log("Please try another game!");
+                    alert("There are no related games for this game :(");
+                }
+                else{
+                    console.log("Success!");
+                }
+                */
+
+                    //console.log(result);
+                //});
+
+            })
+            .catch(err => {
+                console.log(err);
+                return null;
+            });
+          
+            /*
         let myGraph = {nodes:[], edges:[]};
         //let myGraph = {nodes:[{id:"1406", label:"Monopoly"}, {id:"1407", label:"Whatever"}], edges:[{id:"e1",source:"1406",target:"1407",label:"SEES"}]};
 
         //Just an example of a graph built out of the other searched results
         let items = this.state.searchItemsResults;
 
+        console.log(myGraph);
+
         for(let i = 0; i < items.length; i++)
         {
-           myGraph.nodes.push({id:items[i].id, label:items[i].name});
-           if(i !== 0)
-           {
-               myGraph.edges.push({id:'e' + items[i].id, source: items[0].id, target:items[i].id, label:"SEES"});
-           }
+            myGraph.nodes.push({id:items[i].id, label:items[i].name});
+            if(i !== 0)
+            {
+                myGraph.edges.push({id:'e' + items[i].id, source: items[0].id, target:items[i].id, label:"SEES"});
+            }
         }
+        */
+
+        //this.setState({ graphJson: myGraph })
 
         this.handleGraphNodeClick(null, item);
 
         this.setState({ isLoading: false, graphJson: myGraph, isGraphBuilt: true, gameIdPreviousGraphBuilt: item.id, previouslySelectedSearch: this.state.selectedSearch });
+
+            
     }
 
 
@@ -281,11 +401,11 @@ class App extends Component {
                                     <label>
                                         <input
                                             type="radio"
-                                            value="related by genre and rating"
-                                            checked={this.state.selectedSearch === "related by genre and rating"}
+                                            value="Algorithm 1"
+                                            checked={this.state.selectedSearch === "Algorithm 1"}
                                             onChange={this.handleChangeSelect}
                                         />
-                                        Related by genre and rating
+                                        Algorithm 1
                                     </label>
                                     </li>
                                     
@@ -293,11 +413,11 @@ class App extends Component {
                                     <label>
                                         <input
                                         type="radio"
-                                        value="related by creator"
-                                        checked={this.state.selectedSearch === "related by creator"}
+                                        value="Algorithm 2"
+                                        checked={this.state.selectedSearch === "Algorithm 2"}
                                         onChange={this.handleChangeSelect}
                                         />
-                                        Related by creator
+                                        Algorithm 2
                                     </label>
                                 </li>
                             </ul>
