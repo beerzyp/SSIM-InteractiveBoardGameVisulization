@@ -158,40 +158,112 @@ class App extends Component {
 
         let myGraph = {nodes:[], edges:[]};
 
+        let queryData = [];
+
         //TODO: Build the graph here  
               
         await axios.get('https://api.rawg.io/api/games/' + item.id + '/suggested?page_size=15')
             .then((response) => {
 
+                queryData = response.data;
+                /*
 
                 //var parseString = require('xml2js').parseString;
                 //var xml = response.data;
                 //parseString(xml, function (err, result) {
-                console.log("someth9ing somethign" + item.name);
-                console.log("  something:" + response.data.results);
+                //console.log("someth9ing somethign" + item.name);
+                //console.log("  something:" + response.data.results);
                 if(response.data.results.length === 0)
                 {
                     //let myGraph = {nodes:[], edges:[]};
 
-                    this.setState({ graphJson: myGraph });
+                    //this.setState({ graphJson: myGraph });
                     console.log("There are no related games for this game :(");
                     console.log("Please try another game!");
                     alert("There are no related games for this game :(");
-                    return myGraph;
+
+                    //return myGraph;
                 }
                 else{
+
+                    let i = 0;
+                    while(i < response.data.results.length)
+                    {
+                        console.log(response.data.results[i]);
+                        i++;
+                    }
+
+
+
                     console.log("Success!");
-                    return myGraph;
+                    //return myGraph;
                 }
 
                     //console.log(result);
                 //});
+                */
 
             })
             .catch(err => {
                 console.log(err);
                 return null;
             });
+
+
+
+            if(queryData.results.length === 0)
+            {
+                //let myGraph = {nodes:[], edges:[]};
+
+                //this.setState({ graphJson: myGraph });
+                console.log("There are no related games for this game :(");
+                console.log("Please try another game!");
+                alert("There are no related games for this game :(");
+
+                //return myGraph;
+            }
+
+            else
+            {
+
+                let relatedGames = [];
+
+                let i = 0;
+                while(i < queryData.results.length)
+                {
+                    console.log(queryData.results[i]);
+                    console.log(queryData.results[i].id);
+
+                    let eachGame = queryData.results[i];
+                    //eachGame.push(queryData.results[i]);
+
+                    relatedGames.push(eachGame);
+
+                    i++;
+                }
+
+                myGraph.nodes.push({id:item.id, label:item.name});
+
+                for(let j = 0; j < relatedGames.length; j++)
+                {
+                    console.log("HEREHERERH");
+                    myGraph.nodes.push({id:relatedGames[j].id, label:relatedGames[j].name});
+                    myGraph.edges.push({id:'e' + relatedGames[j].id, source: item.id, target:relatedGames[j].id, label:"SEES"});
+                }
+
+
+
+
+                console.log("Success!");
+                console.log(myGraph);
+                //return myGraph;
+            }
+
+                //console.log(result);
+            //});
+                
+
+
 
         this.handleGraphNodeClick(null, item);
 
@@ -229,29 +301,7 @@ class App extends Component {
 
                 console.log("My Graph:" + myGraph.nodes);
 
-                return myGraph;
-
-
-
-                //var parseString = require('xml2js').parseString;
-                //var xml = response.data;
-                //parseString(xml, function (err, result) {
-                /*if(response.data.results === [])
-                {
-                    let myGraph = {nodes:[], edges:[]};
-
-                    this.setState({ graphJson: myGraph });
-                    console.log("There are no related games for this game :(");
-                    console.log("Please try another game!");
-                    alert("There are no related games for this game :(");
-                }
-                else{
-                    console.log("Success!");
-                }
-                */
-
-                    //console.log(result);
-                //});
+                //return myGraph;
 
             })
             .catch(err => {
@@ -315,7 +365,7 @@ class App extends Component {
                 }
                 else 
                 {
-                    gameRating = ' ' + gameRating + '/ 10';
+                    gameRating = ' ' + gameRating + '/ 5';
                 }
 
                 let gameName = this.state.nodeClicked.name;  
