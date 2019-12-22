@@ -162,7 +162,7 @@ class App extends Component {
 
         //TODO: Build the graph here  
               
-        await axios.get('https://api.rawg.io/api/games/' + item.id + '/suggested?page_size=7')
+        await axios.get('https://api.rawg.io/api/games/' + item.id + '/suggested?page_size=15')
             .then((response) => {
 
                 queryData = response.data;
@@ -337,7 +337,7 @@ class App extends Component {
 
                 //console.log("In Algorithm 1: query API for " + relatedGames[j].name + " related games");
 
-                await axios.get('https://api.rawg.io/api/games/' + relatedGames[j].id + '/suggested?page_size=7')
+                await axios.get('https://api.rawg.io/api/games/' + relatedGames[j].id + '/suggested?page_size=15')
                 .then((response) => {
 
                     //console.log("In Algorithm 1: Inside axios query for each " + relatedGames[j].name + " related games");
