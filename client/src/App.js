@@ -3,6 +3,7 @@ import { Col, Row } from 'reactstrap';
 import { Sigma, RandomizeNodePositions, EdgeShapes, NodeShapes } from 'react-sigma';
 import ForceLink from 'react-sigma/lib/ForceLink'
 import axios from 'axios';
+import chroma from "chroma-js";
 
 import './App.scss';
 
@@ -89,7 +90,28 @@ class App extends Component {
 
 
     getNodeColor(item) {
-        return 'orange';
+
+        let itemRating = item.rating;   
+        if(itemRating >= 0 && itemRating <= 1.5)
+        {
+            return '#acfa88';
+        }
+        else if(itemRating <= 2.5)
+        {
+            return '#fafd2d';
+        }
+        else if(itemRating <= 3.5)
+        {
+            return '#ffd900';
+        }
+        else if (itemRating <= 4.25)
+        {
+            return '#ff9114';
+        }
+        else
+        {
+            return '#ff3300';
+        }
     }
 
 
@@ -599,7 +621,7 @@ class App extends Component {
     displayGraph() {
         if(this.state.isGraphBuilt) {
             return (
-                <Sigma id="sigmaGraph" style={{ width:"100%", height:"100%" }} onClickNode={this.handleGraphNodeClick} graph={this.state.graphJson} settings={{labelThreshold:10, /*drawLabels: false, */drawEdges: true, clone: false}}>
+                <Sigma id="sigmaGraph" style={{ width:"100%", height:"100%" }} onClickNode={this.handleGraphNodeClick} graph={this.state.graphJson} settings={{ /*drawLabels: false, */drawEdges: true, clone: false}}>
                    
                     <RandomizeNodePositions/>
                     <EdgeShapes default="line"/>
@@ -623,7 +645,7 @@ class App extends Component {
                     </h3>
                     <p>
                         Blablablabla, colocar nome do board game na search bar, blablabla, será criado um grafo com os board games
-                        relacionados para fácil visualização, blablabla.
+                        relacionados para fácil visualização, blablabla. Node color conveys the game rating and node size conveys popularity
                     </p>
                     <p>
                         Yes, the loading wheel is pizza... (I'm hungry ok?!)
