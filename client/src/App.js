@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Col, Row } from 'reactstrap';
-import { Sigma, RandomizeNodePositions, RelativeSize, EdgeShapes, NodeShapes } from 'react-sigma';
+import { Sigma, RandomizeNodePositions, EdgeShapes, NodeShapes } from 'react-sigma';
 import ForceLink from 'react-sigma/lib/ForceLink'
 import axios from 'axios';
 
@@ -30,8 +30,11 @@ class App extends Component {
 
         this.handleChangeSearch = this.handleChangeSearch.bind(this);
         this.handleChangeSelect = this.handleChangeSelect.bind(this);
-
         this.handleSubmit = this.handleSubmit.bind(this);
+
+        this.getNodeSize = this.getNodeSize.bind(this);
+        this.getNodeColor = this.getNodeColor.bind(this);
+
         this.handleGraphNodeClick = this.handleGraphNodeClick.bind(this);
         this.buildGraph = this.buildGraph.bind(this);
         this.buildGraphAlgorithm1 = this.buildGraphAlgorithm1.bind(this);
@@ -82,6 +85,37 @@ class App extends Component {
         //TODO (if time is our friend): exclude DLCs from search results
 
         this.setState({ isLoading: false, searchNameWasSubmitted: true, previouslySearchedName: this.state.searchName });
+    }
+
+
+    getNodeColor(item) {
+        return 'orange';
+    }
+
+
+    getNodeSize(item) {
+        if(item.ratings.length === 0)
+        {
+            return 50;
+        }
+
+        let totalRatings = 0;
+
+        let itemRatings = item.ratings;
+        for(let i = 0; i < itemRatings.length; i++)
+        {
+            totalRatings = totalRatings + itemRatings[i].count;
+        }
+
+        if(totalRatings < 200)
+        {
+            return 50;
+        }
+        else
+        {
+            let sizeFormula = Math.floor(totalRatings/4);
+            return sizeFormula;
+        }
     }
 
 
@@ -183,7 +217,8 @@ class App extends Component {
         {
             let relatedGames = [];                                      //Initialize variable that will hold the games related to the main game
 
-            myGraph.nodes.push({id:item.id, label:item.name});          //Push main game node to graph
+            let mainNodeSize = this.getNodeSize(item);
+            myGraph.nodes.push({id:item.id, label:item.name, color: 'black', size: mainNodeSize});          //Push main game node to graph
 
             let i = 0;
             while(i < queryData.results.length)                         //Push all related games inside queryData.results to relatedGames variable
@@ -215,7 +250,7 @@ class App extends Component {
                         }
                         if(!doesEdgeExist)      //Add edge
                         {
-                            myGraph.edges.push({id: 'e' + item.id + 'e' + myGraph.nodes[m].id, source: item.id, target: myGraph.nodes[m].id, label: "SEES"});
+                            myGraph.edges.push({id: 'e' + item.id + 'e' + myGraph.nodes[m].id, source: item.id, target: myGraph.nodes[m].id, label: "SEES", color: '#c9c9c9'});
                         }
                         doesNodeExist = true;
                         break;
@@ -224,8 +259,10 @@ class App extends Component {
 
                 if(!doesNodeExist)              //Add node and edge
                 {
-                    myGraph.nodes.push({id: relatedGames[j].id, label: relatedGames[j].name});
-                    myGraph.edges.push({id: 'e' + item.id + 'e' + relatedGames[j].id, source: item.id, target: relatedGames[j].id, label: "SEES"});
+                    let eachNodeSize = this.getNodeSize(relatedGames[j]);
+                    let eachNodeColor = this.getNodeColor(relatedGames[j]);
+                    myGraph.nodes.push({id: relatedGames[j].id, label: relatedGames[j].name, size: eachNodeSize, color: eachNodeColor});
+                    myGraph.edges.push({id: 'e' + item.id + 'e' + relatedGames[j].id, source: item.id, target: relatedGames[j].id, label: "SEES", color: '#c9c9c9'});
                 }
 
                 let queryDataEachRelatedGame = [];                      //Initialize variable that will hold the query response    
@@ -271,7 +308,7 @@ class App extends Component {
                             }
                             if(!doesEdgeExistPhaseTwo)      //Add edge
                             {
-                                myGraph.edges.push({id: 'e' + relatedGames[j].id + 'e' + myGraph.nodes[n].id, source: relatedGames[j].id, target: myGraph.nodes[n].id, label: "SEES"});
+                                myGraph.edges.push({id: 'e' + relatedGames[j].id + 'e' + myGraph.nodes[n].id, source: relatedGames[j].id, target: myGraph.nodes[n].id, label: "SEES", color: '#c9c9c9'});
                             }
                             doesNodeExistPhaseTwo = true;
                             break;
@@ -280,8 +317,10 @@ class App extends Component {
     
                     if(!doesNodeExistPhaseTwo)              //Add node and edge
                     {
-                        myGraph.nodes.push({id: eachGameRelatedGames[l].id, label: eachGameRelatedGames[l].name});
-                        myGraph.edges.push({id: 'e' + relatedGames[j].id + 'e' + eachGameRelatedGames[l].id, source: relatedGames[j].id, target: eachGameRelatedGames[l].id, label: "SEES"});   
+                        let eachNodeSize = this.getNodeSize(eachGameRelatedGames[l]);
+                        let eachNodeColor = this.getNodeColor(eachGameRelatedGames[l]);
+                        myGraph.nodes.push({id: eachGameRelatedGames[l].id, label: eachGameRelatedGames[l].name, size: eachNodeSize, color: eachNodeColor});
+                        myGraph.edges.push({id: 'e' + relatedGames[j].id + 'e' + eachGameRelatedGames[l].id, source: relatedGames[j].id, target: eachGameRelatedGames[l].id, label: "SEES", color: '#c9c9c9'});   
                     }
                 }
                 
@@ -342,6 +381,7 @@ class App extends Component {
 
             
     }
+
 
     async buildGraphAlgorithm3(item) {
 
@@ -491,7 +531,6 @@ class App extends Component {
     }
 
 
-
     displaySideBarInformation() {
 
         if(this.state.isLoading) {
@@ -570,11 +609,11 @@ class App extends Component {
     displayGraph() {
         if(this.state.isGraphBuilt) {
             return (
-                <Sigma id="sigmaGraph" style={{ width:"100%", height:"100%" }} onClickNode={this.handleGraphNodeClick} graph={this.state.graphJson} settings={{drawEdges: true, clone: false}}>
-                    <RelativeSize initialSize={15}/>
+                <Sigma id="sigmaGraph" style={{ width:"100%", height:"100%" }} onClickNode={this.handleGraphNodeClick} graph={this.state.graphJson} settings={{labelThreshold:10, /*drawLabels: false, */drawEdges: true, clone: false}}>
+                   
                     <RandomizeNodePositions/>
-                    <EdgeShapes default="tapered"/>
-                    <NodeShapes default="star"/>
+                    <EdgeShapes default="line"/>
+                    <NodeShapes default="circle"/>
                     <ForceLink easing="cubicInOut" gravity={2} nodeSiblingsAngleMin={1} /* this attracts nodes connected with edges of positive weight edgeWeightInfluence={2}*//>
                 </Sigma>
             )
