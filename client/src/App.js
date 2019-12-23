@@ -94,18 +94,8 @@ class App extends Component {
 
 
     getNodeSize(item) {
-        if(item.ratings.length === 0)
-        {
-            return 50;
-        }
 
-        let totalRatings = 0;
-
-        let itemRatings = item.ratings;
-        for(let i = 0; i < itemRatings.length; i++)
-        {
-            totalRatings = totalRatings + itemRatings[i].count;
-        }
+        let totalRatings = item.reviews_count;
 
         if(totalRatings < 200)
         {
