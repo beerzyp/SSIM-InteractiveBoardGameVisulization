@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import json
 import sys
-
+from pandas.io.json import json_normalize
 
 #Read data from stdin
 def read_in():
@@ -13,9 +13,21 @@ def read_in():
     return json.loads(lines[0])
 
 def main():
-    lines = read_in()
-    print(''.join(lines))
-
+    #lines = read_in()
+    #print(''.join(lines))
+    '''
+    json_dict = pd.read_json ('test_data.json')
+    json_normalize(json_dict)'''
+    with open('test_data.json', 'r', encoding='utf-8') as data_file:    
+        data = json.load(data_file)
+    clusterDfs = []
+    for i in range(len(data)):
+        df1 = json_normalize(data[i][0])
+        df2 = json_normalize(data[i][1])
+        clusterDf = pd.concat([df1, df2], sort=True)
+        clusterDfs.append(clusterDf.drop(columns=['background_image', 'clip' \
+            ]))
+    print(clusterDfs[0].info())
 # Start process
 if __name__ == '__main__':
     main()
