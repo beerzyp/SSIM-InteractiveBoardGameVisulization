@@ -3,7 +3,6 @@ import { Col, Row } from 'reactstrap';
 import { Sigma, RandomizeNodePositions, EdgeShapes, NodeShapes } from 'react-sigma';
 import ForceLink from 'react-sigma/lib/ForceLink'
 import axios from 'axios';
-import chroma from "chroma-js";
 
 import './App.scss';
 
@@ -262,7 +261,7 @@ class App extends Component {
                         }
                         if(!doesEdgeExist)      //Add edge
                         {
-                            myGraph.edges.push({id: 'e' + item.id + 'e' + myGraph.nodes[m].id, source: item.id, target: myGraph.nodes[m].id, label: "SEES", color: '#c9c9c9'});
+                            myGraph.edges.push({id: 'e' + item.id + 'e' + myGraph.nodes[m].id, source: item.id, target: myGraph.nodes[m].id, label: "SEES", color: '#e4e4e4'});
                         }
                         doesNodeExist = true;
                         break;
@@ -274,7 +273,7 @@ class App extends Component {
                     let eachNodeSize = this.getNodeSize(relatedGames[j]);
                     let eachNodeColor = this.getNodeColor(relatedGames[j]);
                     myGraph.nodes.push({id: relatedGames[j].id, label: relatedGames[j].name, size: eachNodeSize, color: eachNodeColor});
-                    myGraph.edges.push({id: 'e' + item.id + 'e' + relatedGames[j].id, source: item.id, target: relatedGames[j].id, label: "SEES", color: '#c9c9c9'});
+                    myGraph.edges.push({id: 'e' + item.id + 'e' + relatedGames[j].id, source: item.id, target: relatedGames[j].id, label: "SEES", color: '#e4e4e4'});
                 }
 
                 let queryDataEachRelatedGame = [];                      //Initialize variable that will hold the query response    
@@ -320,7 +319,7 @@ class App extends Component {
                             }
                             if(!doesEdgeExistPhaseTwo)      //Add edge
                             {
-                                myGraph.edges.push({id: 'e' + relatedGames[j].id + 'e' + myGraph.nodes[n].id, source: relatedGames[j].id, target: myGraph.nodes[n].id, label: "SEES", color: '#c9c9c9'});
+                                myGraph.edges.push({id: 'e' + relatedGames[j].id + 'e' + myGraph.nodes[n].id, source: relatedGames[j].id, target: myGraph.nodes[n].id, label: "SEES", color: '#e4e4e4'});
                             }
                             doesNodeExistPhaseTwo = true;
                             break;
@@ -332,7 +331,7 @@ class App extends Component {
                         let eachNodeSize = this.getNodeSize(eachGameRelatedGames[l]);
                         let eachNodeColor = this.getNodeColor(eachGameRelatedGames[l]);
                         myGraph.nodes.push({id: eachGameRelatedGames[l].id, label: eachGameRelatedGames[l].name, size: eachNodeSize, color: eachNodeColor});
-                        myGraph.edges.push({id: 'e' + relatedGames[j].id + 'e' + eachGameRelatedGames[l].id, source: relatedGames[j].id, target: eachGameRelatedGames[l].id, label: "SEES", color: '#c9c9c9'});   
+                        myGraph.edges.push({id: 'e' + relatedGames[j].id + 'e' + eachGameRelatedGames[l].id, source: relatedGames[j].id, target: eachGameRelatedGames[l].id, label: "SEES", color: '#e4e4e4'});   
                     }
                 }
                 
@@ -621,11 +620,13 @@ class App extends Component {
     displayGraph() {
         if(this.state.isGraphBuilt) {
             return (
-                <Sigma id="sigmaGraph" style={{ width:"100%", height:"100%" }} onClickNode={this.handleGraphNodeClick} graph={this.state.graphJson} settings={{ /*drawLabels: false, */drawEdges: true, clone: false}}>
+                <Sigma id="sigmaGraph" style={{ width:"100%", height:"100%" }} onClickNode={this.handleGraphNodeClick} graph={this.state.graphJson} settings={{ drawEdges: true, clone: false }}>
                    
                     <RandomizeNodePositions/>
-                    <EdgeShapes default="line"/>
+                    { /* These only work with canvas render, which we aren't using. WEBGL is better I guess*/}
+                    <EdgeShapes default="line"/> 
                     <NodeShapes default="circle"/>
+                   
                     <ForceLink easing="cubicInOut" gravity={2} nodeSiblingsAngleMin={1} /* this attracts nodes connected with edges of positive weight edgeWeightInfluence={2}*//>
                 </Sigma>
             )
