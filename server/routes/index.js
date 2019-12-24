@@ -28,20 +28,20 @@ router.post('/gameSearch', function (req, res) {
   //chunks = chunkSubstr(req.body.games,30000);
   var pyshell = new PythonShell(correctedPath,{pythonPath : 'C:/Users/USER/AppData/Local/Programs/Python/Python37/python.exe'});
   pyshell.send(JSON.stringify(req.body.games));
-
   pyshell.on('message', function (message) {
-      // received a message sent from the Python script (a simple "print" statement)
-      console.log(message);
+    res.write(message);
+    res.end();
   });
 
-  // end the input stream and allow the process to exit
+   // end the input stream and allow the process to exit
   pyshell.end(function (err) {
-      if (err){
-          throw err;
-      };
+    if (err){
+        throw err;
+    };
 
-      console.log('finished');
+    console.log('finished');
   });
+
 });
 
 

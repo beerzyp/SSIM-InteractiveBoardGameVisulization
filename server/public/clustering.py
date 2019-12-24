@@ -120,7 +120,7 @@ def fillNanValues(clusterDf):
     return clusterDf
 
 def runAlgorithm(X):
-    # scaling the data to "reduce" mean and varianc
+    # scaling the data to "reduce" mean and variance
     scaler = StandardScaler() 
     X_scaled = scaler.fit_transform(X) 
     
@@ -133,8 +133,8 @@ def runAlgorithm(X):
     X_principal = pca.fit_transform(X_normalized) 
     X_principal = pd.DataFrame(X_principal) 
     X_principal.columns = ['P1', 'P2'] 
-
-    km = KMeans(n_clusters = 19, random_state = 1).fit(X_principal)
+    size = len(X)
+    km = KMeans(n_clusters=size , random_state = 1).fit(X_principal)
     # returns a matrix of cluster distances
     dists = euclidean_distances(km.cluster_centers_)
     return dists[0] 
