@@ -1,4 +1,6 @@
 from sklearn.cluster import SpectralClustering
+from sklearn.cluster import KMeans
+from sklearn.metrics.pairwise import euclidean_distances
 import pandas as pd 
 import matplotlib.pyplot as plt 
 from sklearn.preprocessing import StandardScaler, normalize 
@@ -10,7 +12,7 @@ import sys
 from pandas.io.json import json_normalize
 import datetime
 import time
-
+import networkx as nx
 
 # Read data from stdin
 def read_in():
@@ -61,26 +63,24 @@ def getGenres(genres):
     return final_genres
 
 def runAlgorithm(X):
-    print(X.dtypes)
+    # scaling the data to "reduce" mean and varianc
     scaler = StandardScaler() 
-    
     X_scaled = scaler.fit_transform(X) 
     
+    # normalizing the data
     X_normalized = normalize(X_scaled) 
     X_normalized = pd.DataFrame(X_normalized) 
     
+    # reducing dimensions of data from n dimensions to 2
     pca = PCA(n_components = 2) 
     X_principal = pca.fit_transform(X_normalized) 
     X_principal = pd.DataFrame(X_principal) 
     X_principal.columns = ['P1', 'P2'] 
-    
-   # Building the clustering model 
-    spectral_model_rbf = SpectralClustering(n_clusters = 12, affinity ='rbf') 
-    
-    # Training the model and Storing the predicted cluster labels 
-    labels_rbf = spectral_model_rbf.fit_predict(X_principal) 
-    print(labels_rbf)
-    return X
+
+    km = KMeans(n_clusters = 19, random_state = 1).fit(X_principal)
+    # returns a matrix of cluster distances
+    dists = euclidean_distances(km.cluster_centers_)
+    return dists[0] 
 
 def main():
     #lines = read_in()
@@ -90,7 +90,7 @@ def main():
     json_normalize(json_dict)'''
     with open('test_data.json', 'r', encoding='utf-8') as data_file:    
         data = json.load(data_file)
-    clusterDfs = []
+    clusterDists = []
     for i in range(len(data)):
         df1 = json_normalize(data[i][0]) # game1
         df2 = json_normalize(data[i][1]) # [related_game1,related_game2,...,related_game18]18
@@ -124,7 +124,7 @@ def main():
         clusterDf = clusterDf.drop(columns=['background_image', \
             'user_game', 'stores', 'short_screenshots', 'name', 'slug', 'dominant_color', \
             'saturated_color', 'short_description', 'ratings', 'platforms','parent_platforms', 'genres']) #for now ignoring platform and parent_platform
-        runAlgorithm(clusterDf)
+        clusterDists.append(runAlgorithm(clusterDf))
     
 # Start process
 if __name__ == '__main__':
