@@ -474,7 +474,6 @@ class App extends Component {
 
             }
             let jsonData = JSON.stringify(allRelatedGames);
-            console.log(jsonData);
             axios
             .post('http://localhost:3001/gameSearch', { games:jsonData})
             .then((response) => console.log('Waiting for algorithm...' +response))

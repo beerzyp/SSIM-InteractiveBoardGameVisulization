@@ -24,10 +24,10 @@ router.get('/', function(req, res, next) {
 router.post('/gameSearch', function (req, res) {
   const somePath = 'public/clustering.py';
   const correctedPath = path.normalize(path.resolve(somePath));
-  const singleQuote = "'";
-  chunks = chunkSubstr(req.body.games,30000);
+  const singleQuote = "'";  
+  //chunks = chunkSubstr(req.body.games,30000);
   var pyshell = new PythonShell(correctedPath,{pythonPath : 'C:/Users/USER/AppData/Local/Programs/Python/Python37/python.exe'});
-  pyshell.send(JSON.stringify(chunks));
+  pyshell.send(JSON.stringify(req.body.games));
 
   pyshell.on('message', function (message) {
       // received a message sent from the Python script (a simple "print" statement)

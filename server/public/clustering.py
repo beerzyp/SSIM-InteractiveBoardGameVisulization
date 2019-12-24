@@ -62,6 +62,63 @@ def getGenres(genres):
     final_genres = all_genres.fillna(0).reset_index(drop=True).astype('int64')
     return final_genres
 
+def fillNanValues(clusterDf):
+    # Filling nan values
+    if 'metacritic' in clusterDf:
+        clusterDf['metacritic'] = clusterDf['metacritic'].fillna(-1)
+    else:
+        clusterDf['metacritic'] = -1
+    if 'community_rating' in clusterDf:
+        clusterDf['community_rating'] = clusterDf['community_rating'].fillna(-1)
+    else:
+        clusterDf['community_rating'] = -1
+    if 'suggestions_count' in clusterDf:
+        clusterDf['suggestions_count'] = clusterDf['suggestions_count'].fillna(0)
+    else:
+        clusterDf['suggestions_count'] = 0
+    if 'reviews_text_count' in clusterDf:
+        clusterDf['reviews_text_count'] = clusterDf['reviews_text_count'].fillna(0)
+    else:
+        clusterDf['reviews_text_count'] = 0
+    clusterDf['released'] = clusterDf['released'].fillna("2000-01-01")
+    if 'ratings_count' in clusterDf:
+        clusterDf['ratings_count'] = clusterDf['ratings_count'].fillna(0)
+    else:
+        clusterDf['ratings_count'] = 0
+    if 'added_by_status.beaten' in clusterDf:
+        clusterDf['added_by_status.beaten'] = clusterDf['added_by_status.beaten'].fillna(0)
+    else:
+        clusterDf['added_by_status.beaten'] = 0
+    if 'added_by_status.playing' in clusterDf:
+        clusterDf['added_by_status.playing'] = clusterDf['added_by_status.playing'].fillna(0)
+    else:
+        clusterDf['added_by_status.playing'] = 0
+    if 'added_by_status.dropped' in clusterDf:
+        clusterDf['added_by_status.dropped'] = clusterDf['added_by_status.dropped'].fillna(0)
+    else:
+        clusterDf['added_by_status.dropped'] = 0
+    if 'added_by_status.owned' in clusterDf:
+        clusterDf['added_by_status.owned'] = clusterDf['added_by_status.owned'].fillna(0)
+    else:
+        clusterDf['added_by_status.owned'] = 0
+    if 'added_by_status.toplay' in clusterDf:
+        clusterDf['added_by_status.toplay'] = clusterDf['added_by_status.toplay'].fillna(0)
+    else:
+        clusterDf['added_by_status.toplay'] = 0
+    if 'added_by_status.yet' in clusterDf:
+        clusterDf['added_by_status.yet'] = clusterDf['added_by_status.yet'].fillna(0)
+    else:
+        clusterDf['added_by_status.yet'] = 0
+    if 'released' in clusterDf:
+        clusterDf['released'] = clusterDf['released'].apply(lambda x: float(time.mktime(datetime.datetime.strptime(x, '%Y-%m-%d').timetuple())))
+    else:
+        clusterDf['released'] = float(0)
+    if 'tba' in clusterDf:
+        clusterDf['tba'] = clusterDf['tba'].apply(lambda x: int(x == True))
+    else:
+        clusterDf['tba'] = False
+    return clusterDf
+
 def runAlgorithm(X):
     # scaling the data to "reduce" mean and varianc
     scaler = StandardScaler() 
@@ -83,38 +140,17 @@ def runAlgorithm(X):
     return dists[0] 
 
 def main():
-    #lines = read_in()
-    #print(''.join(lines))
-    '''
-    json_dict = pd.read_json ('test_data.json')
-    json_normalize(json_dict)'''
-    with open('test_data.json', 'r', encoding='utf-8') as data_file:    
-        data = json.load(data_file)
+    lines = read_in()
+    jsonData = ''.join(lines)
+    data = json.loads(jsonData)
     clusterDists = []
     for i in range(len(data)):
         df1 = json_normalize(data[i][0]) # game1
         df2 = json_normalize(data[i][1]) # [related_game1,related_game2,...,related_game18]18
         clusterDf = pd.concat([df1, df2], sort=True).reset_index(drop=True)
-        # Filling nan values
-        clusterDf['metacritic'] = clusterDf['metacritic'].fillna(-1)
-        clusterDf['community_rating'] = clusterDf['community_rating'].fillna(-1) 
-        clusterDf['suggestions_count'] = clusterDf['suggestions_count'].fillna(0)
-        clusterDf['reviews_text_count'] = clusterDf['reviews_text_count'].fillna(0)
-        clusterDf['released'] = clusterDf['released'].fillna("2000-01-01")
-        clusterDf['ratings_count'] = clusterDf['ratings_count'].fillna(0)
-        clusterDf['added_by_status.beaten'] = clusterDf['added_by_status.beaten'].fillna(0)
-        if 'added_by_status.playing' in clusterDf:
-            clusterDf['added_by_status.playing'] = clusterDf['added_by_status.playing'].fillna(0)
-        else:
-            clusterDf['added_by_status.playing'] = 0
-        clusterDf['added_by_status.dropped'] = clusterDf['added_by_status.dropped'].fillna(0)
-        clusterDf['added_by_status.owned'] = clusterDf['added_by_status.owned'].fillna(0)
-        clusterDf['added_by_status.toplay'] = clusterDf['added_by_status.toplay'].fillna(0)
-        clusterDf['added_by_status.yet'] = clusterDf['added_by_status.yet'].fillna(0)
-        clusterDf['released'] = clusterDf['released'].apply(lambda x: float(time.mktime(datetime.datetime.strptime(x, '%Y-%m-%d').timetuple())))
-        clusterDf['tba'] = clusterDf['tba'].apply(lambda x: int(x == True))
+        clusterDf = fillNanValues(clusterDf)
         # Getting complex objects
-        '''!IGNORING platforms = getPlatforms(clusterDf['parent_platforms'])  IGNORING platforms and parent_platforms!'''
+        #!IGNORING platforms = getPlatforms(clusterDf['parent_platforms'])  IGNORING platforms and parent_platforms!
         ratings = getRatings(clusterDf['ratings'])
         clusterDf = pd.merge(clusterDf, ratings, how='outer', left_index=True, right_index=True)
         genres = getGenres(clusterDf['genres'])
@@ -125,7 +161,8 @@ def main():
             'user_game', 'stores', 'short_screenshots', 'name', 'slug', 'dominant_color', \
             'saturated_color', 'short_description', 'ratings', 'platforms','parent_platforms', 'genres']) #for now ignoring platform and parent_platform
         clusterDists.append(runAlgorithm(clusterDf))
-    
+    print(clusterDists)
+    return clusterDists
 # Start process
 if __name__ == '__main__':
     main()
