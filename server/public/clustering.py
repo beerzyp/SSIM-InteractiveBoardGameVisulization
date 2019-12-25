@@ -133,7 +133,9 @@ def runAlgorithm(X):
     X_principal = pd.DataFrame(X_principal) 
     X_principal.columns = ['P1', 'P2'] 
     size = len(X)
+    # clustering to get distances of outer clusters
     km = KMeans(n_clusters=size , random_state = 1).fit(X_principal)
+
     # returns a matrix of cluster distances
     dists = euclidean_distances(km.cluster_centers_)
     return dists[0] 

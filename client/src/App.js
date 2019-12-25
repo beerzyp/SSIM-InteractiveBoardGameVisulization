@@ -473,6 +473,7 @@ class App extends Component {
                 
 
             }
+            console.log(allRelatedGames.length);
             let jsonData = JSON.stringify(allRelatedGames);
             let relatedDistances = [];
             await axios
