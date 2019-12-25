@@ -378,56 +378,25 @@ class App extends Component {
                 relatedGames.push(eachGame);
                 i++;
             }
+
             let allRelatedGames = [];
             //For each game related to the main game, add node and edges to graph (if unique) and process its own related games
             for(let j = 0; j < relatedGames.length; j++) 
             {
-                let doesNodeExist = false;
-                let doesEdgeExist = false;
-
-                for(let m = 0; m < myGraph.nodes.length; m++)               //Seach all existent nodes
-                {
-                    if(relatedGames[j].id === myGraph.nodes[m].id)          //If current game's id matches an existing node's id, don't add node and process edges
-                    {
-                        for(let o = 0; o < myGraph.edges.length; o++)       //Search all existent edges
-                        {
-                            //If existing game node already has an edge connecting to main game, dont add edge
-                            if(('e' + relatedGames[j].id + 'e' + item.id === myGraph.edges[o].id) || ('e' + item.id + 'e' + relatedGames[j].id === myGraph.edges[o].id))
-                            {  
-                                doesEdgeExist = true;
-                                break;
-                            }
-
-                        }
-                        if(!doesEdgeExist)      //Add edge
-                        {
-                            myGraph.edges.push({id: 'e' + item.id + 'e' + myGraph.nodes[m].id, source: item.id, target: myGraph.nodes[m].id, label: "SEES"});
-                        }
-                        doesNodeExist = true;
-                        break;
-                    }
-                }
-
-                if(!doesNodeExist)              //Add node and edge
-                {
-                    myGraph.nodes.push({id: relatedGames[j].id, label: relatedGames[j].name});
-                    myGraph.edges.push({id: 'e' + item.id + 'e' + relatedGames[j].id, source: item.id, target: relatedGames[j].id, label: "SEES"});
-                }
-
                 let queryDataEachRelatedGame = [];                      //Initialize variable that will hold the query response    
-
+    
                 await axios.get('https://api.rawg.io/api/games/' + relatedGames[j].id + '/suggested?page_size=18')
                 .then((response) => {
-
+    
                     queryDataEachRelatedGame = response.data;           //queryDataEachRelatedGame holds the related games to each of the main game's related games
                 })
                 .catch(err => {
                     console.log(err);
                     return null;
                 });
-
+    
                 let eachGameRelatedGames = [];                      //Initialize variable that will hold the games related to each of the main game's related games
-
+    
                 let k = 0;
                 while(k < queryDataEachRelatedGame.results.length)  //Push all related games inside queryDataEachRelatedGame.results to eachGameRelatedGames variable
                 { 
@@ -436,44 +405,8 @@ class App extends Component {
                     k++;
                 }
                 allRelatedGames.push([relatedGames[j],eachGameRelatedGames]);
-                //For each game related to the main game's related games, add node and edges to graph (if unique)
-                for(let l = 0; l < eachGameRelatedGames.length; l++) 
-                {
-                    let doesNodeExistPhaseTwo = false;
-                    let doesEdgeExistPhaseTwo = false;
-
-                    for(let n = 0; n < myGraph.nodes.length; n++)        //Seach all existent nodes
-                    {
-                        if(eachGameRelatedGames[l].id === myGraph.nodes[n].id)  //If current game's id matches an existing node's id, don't add node and process edges
-                        {
-                            for(let p = 0; p < myGraph.edges.length; p++)   //Search all existing edges
-                            {
-                                //If existing game node already has an edge connecting to the current main game's related game, dont add edge
-                                if(('e' + eachGameRelatedGames[l].id + 'e' + relatedGames[j].id === myGraph.edges[p].id) || ('e' + relatedGames[j].id + 'e' + eachGameRelatedGames[l].id === myGraph.edges[p].id))
-                                {  
-                                    doesEdgeExistPhaseTwo = true;
-                                    break;
-                                }
-                            }
-                            if(!doesEdgeExistPhaseTwo)      //Add edge
-                            {
-                                myGraph.edges.push({id: 'e' + relatedGames[j].id + 'e' + myGraph.nodes[n].id, source: relatedGames[j].id, target: myGraph.nodes[n].id, label: "SEES"});
-                            }
-                            doesNodeExistPhaseTwo = true;
-                            break;
-                        }
-                    }
-    
-                    if(!doesNodeExistPhaseTwo)              //Add node and edge
-                    {
-                        myGraph.nodes.push({id: eachGameRelatedGames[l].id, label: eachGameRelatedGames[l].name});
-                        myGraph.edges.push({id: 'e' + relatedGames[j].id + 'e' + eachGameRelatedGames[l].id, source: relatedGames[j].id, target: eachGameRelatedGames[l].id, label: "SEES"});   
-                    }
-                }
-                
-
             }
-            console.log(allRelatedGames.length);
+
             let jsonData = JSON.stringify(allRelatedGames);
             let relatedDistances = [];
             await axios
@@ -485,12 +418,24 @@ class App extends Component {
                 for (let index = 0; index < relatedDistances.length; index++) {
                     relatedDistances[index] = JSON.parse(relatedDistances[index]);
                 }
-                console.log(relatedDistances);
             }) 
             .catch(err => {
-              console.error(err);
+                console.error(err);
             });
-
+            console.log(allRelatedGames)
+            //For each game related to the main game, add node and edges to graph (if unique) and process its own related games
+            console.log(item.name);
+            for(let j = 0; j < allRelatedGames.length; j++) 
+            {
+                let doesNodeExist = false;
+                let doesEdgeExist = false;
+                const game = allRelatedGames[j][0];
+                const related_games = allRelatedGames[j][1];
+                console.log(j);
+                console.log(game.name);
+                for (let m = 0; m < related_games.length; m++) {
+                }
+            }
             console.log("In Algorithm 3: Success!");
             //console.log(myGraph);
         }                
@@ -577,17 +522,33 @@ class App extends Component {
     }
 
 
-    displayGraph() {
+    displayGraph(flag) {
+        flag = 'forcelink_distances';
         if(this.state.isGraphBuilt) {
-            return (
-                <Sigma id="sigmaGraph" style={{ width:"100%", height:"100%" }} onClickNode={this.handleGraphNodeClick} graph={this.state.graphJson} settings={{drawEdges: true, clone: false}}>
-                    <RelativeSize initialSize={15}/>
-                    <RandomizeNodePositions/>
-                    <EdgeShapes default="tapered"/>
-                    <NodeShapes default="star"/>
-                    <ForceLink easing="cubicInOut" gravity={2} nodeSiblingsAngleMin={1} /* this attracts nodes connected with edges of positive weight edgeWeightInfluence={2}*//>
-                </Sigma>
-            )
+            if(flag === 'default')
+            {
+                return (
+                    <Sigma id="sigmaGraph" style={{ width:"100%", height:"100%" }} onClickNode={this.handleGraphNodeClick} graph={this.state.graphJson} settings={{drawEdges: true, clone: false}}>
+                        <RelativeSize initialSize={15}/>
+                        <RandomizeNodePositions/>
+                        <EdgeShapes default="tapered"/>
+                        <NodeShapes default="star"/>
+                        <ForceLink easing="cubicInOut" gravity={2} nodeSiblingsAngleMin={1} /* this attracts nodes connected with edges of positive weight edgeWeightInfluence={2}*//>
+                    </Sigma>
+                )
+            }
+            else if(flag === 'forcelink_distances')
+            {
+                return (
+                    <Sigma id="sigmaGraph" style={{ width:"100%", height:"100%" }} onClickNode={this.handleGraphNodeClick} graph={this.state.graphJson} settings={{drawEdges: true, clone: false}}>
+                        <RelativeSize initialSize={15}/>
+                        <RandomizeNodePositions/>
+                        <EdgeShapes default="tapered"/>
+                        <NodeShapes default="star"/>
+                        <ForceLink easing="cubicInOut" gravity={2} nodeSiblingsAngleMin={1} edgeWeightInfluence={2} /* this attracts nodes connected with edges of positive weight edgeWeightInfluence={2}*//>
+                    </Sigma>
+                )
+            }
         }
     }
 
