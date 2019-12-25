@@ -36,7 +36,6 @@ def getPlatforms(platforms):
     final_platforms = pd.DataFrame()
     for i in range(len(platforms)):
         game_platforms = json_normalize(platforms[i])
-        print(game_platforms)
         if not game_platforms.empty:
             game_platform =  game_platforms['platform.id']
             platform_transposed = pd.DataFrame(game_platform).transpose().reset_index(drop=True)
@@ -159,28 +158,11 @@ def main():
         clusterDf = clusterDf[clusterDf.columns.drop(list(clusterDf.filter(regex='clip')))]
         clusterDf = clusterDf.drop(columns=['background_image', \
             'user_game', 'stores', 'short_screenshots', 'name', 'slug', 'dominant_color', \
-            'saturated_color', 'short_description', 'ratings', 'platforms','parent_platforms', 'genres']) #for now ignoring platform and parent_platform
-        clusterDists.append(runAlgorithm(clusterDf))
+            'saturated_color', 'short_description', 'ratings', 'platforms','parent_platforms', 'genres']) #for now ignoring platform and parent_platform 
+        json_dist = json.dumps(runAlgorithm(clusterDf).tolist(), separators=(',', ':'))
+        clusterDists.append(json_dist)
     print(clusterDists)
     return clusterDists
 # Start process
 if __name__ == '__main__':
     main()
-
-
-'''
-dataset = []
-encoder = LabelEncoder()
-dataset = encoder.fit_transform(dataset.astype(str))
-eps - predefined min threshold distance
-delta/min_sample - minimum number of other instances
-optics = OPTICS(min_samples=8)
-X = np.array(dataset)
-optics.fit(X)
-vehicular["marca"] = pd.Series(optics.labels_)
-labels = optics.labels_
-n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
-print("number of clusters: " + str(n_clusters_))
-outliers = (vehicular["marca"]==-1).sum()
-print("outliers: " + str(outliers))
-'''

@@ -30,10 +30,7 @@ router.post('/gameSearch', function (req, res) {
   pyshell.send(JSON.stringify(req.body.games));
 
   pyshell.on('message', function (message) {
-    const json = JSON.stringify(message);
-    console.log(json);
-    res.write(json);
-    res.end();
+    res.write(message);
   });
 
    // end the input stream and allow the process to exit
@@ -42,6 +39,7 @@ router.post('/gameSearch', function (req, res) {
         throw err;
     };
     console.log('finished');
+    res.end();
   });
 
 });

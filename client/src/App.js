@@ -474,9 +474,18 @@ class App extends Component {
 
             }
             let jsonData = JSON.stringify(allRelatedGames);
+            let relatedDistances = [];
             await axios
             .post('http://localhost:3001/gameSearch', { games:jsonData})
-            .then((response) => { console.log(response.data); }) 
+            .then((response) => {
+                const doubleQuote = '"';
+                relatedDistances = response.data.replace(/'/g, doubleQuote);
+                relatedDistances = JSON.parse(relatedDistances);
+                for (let index = 0; index < relatedDistances.length; index++) {
+                    relatedDistances[index] = JSON.parse(relatedDistances[index]);
+                }
+                console.log(relatedDistances);
+            }) 
             .catch(err => {
               console.error(err);
             });
