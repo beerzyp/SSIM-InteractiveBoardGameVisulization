@@ -28,8 +28,11 @@ router.post('/gameSearch', function (req, res) {
   //chunks = chunkSubstr(req.body.games,30000);
   var pyshell = new PythonShell(correctedPath,{pythonPath : 'C:/Users/USER/AppData/Local/Programs/Python/Python37/python.exe'});
   pyshell.send(JSON.stringify(req.body.games));
+
   pyshell.on('message', function (message) {
-    res.write(message);
+    const json = JSON.stringify(message);
+    console.log(json);
+    res.write(json);
     res.end();
   });
 
@@ -38,7 +41,6 @@ router.post('/gameSearch', function (req, res) {
     if (err){
         throw err;
     };
-
     console.log('finished');
   });
 
