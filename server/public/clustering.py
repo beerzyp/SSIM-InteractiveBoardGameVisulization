@@ -128,13 +128,14 @@ def runAlgorithm(X):
     X_normalized = pd.DataFrame(X_normalized) 
     
     # reducing dimensions of data from n dimensions to 2
-    pca = PCA(n_components = 2) 
+    '''pca = PCA(n_components = 2) 
     X_principal = pca.fit_transform(X_normalized) 
     X_principal = pd.DataFrame(X_principal) 
     X_principal.columns = ['P1', 'P2'] 
+    '''
     size = len(X)
     # clustering to get distances of outer clusters
-    km = KMeans(n_clusters=size , random_state = 1).fit(X_principal)
+    km = KMeans(n_clusters=size , random_state = 1).fit(X_normalized)
 
     # returns a matrix of cluster distances
     dists = euclidean_distances(km.cluster_centers_)

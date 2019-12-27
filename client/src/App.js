@@ -565,7 +565,7 @@ class App extends Component {
     
                     if(!doesNodeExistPhaseTwo)              //Add node and edge
                     {
-                        const cluster_distance_ajusted = 1/(cluster_distance[l+1]+1);
+                        const cluster_distance_ajusted = 1/(cluster_distance[l+1]);
                         console.log(eachGameRelatedGames[l].name + " distance: " + cluster_distance[l+1]);
                         console.log("ajudsted distance:" + cluster_distance_ajusted)
                         let eachNodeSize = this.getNodeSize(relatedGames[l]);
@@ -662,7 +662,7 @@ class App extends Component {
 
 
     displayGraph() {
-        const angle = Math.PI/2-0.01;
+        const angle = Math.PI/3;
         console.log(angle);
         if(this.state.isGraphBuilt) {
             if(this.state.displayAlgorithm === 'default')
