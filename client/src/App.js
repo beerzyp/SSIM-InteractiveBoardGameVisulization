@@ -460,7 +460,7 @@ class App extends Component {
                 if(!doesNodeExist)              //Add node and edge
                 {
                     myGraph.nodes.push({id: relatedGames[j].id, label: relatedGames[j].name});
-                    myGraph.edges.push({id: 'e' + item.id + 'e' + relatedGames[j].id, source: item.id, target: relatedGames[j].id, label: "SEES",weight:-1});
+                    myGraph.edges.push({id: 'e' + item.id + 'e' + relatedGames[j].id, source: item.id, target: relatedGames[j].id, label: "SEES",weight:1});
                 }
 
                 let eachGameRelatedGames = [];                      //Initialize variable that will hold the games related to each of the main game's related games
@@ -504,9 +504,11 @@ class App extends Component {
     
                     if(!doesNodeExistPhaseTwo)              //Add node and edge
                     {
+                        const cluster_distance_ajusted = 1/(cluster_distance[l+1]+1);
                         console.log(eachGameRelatedGames[l].name + " distance: " + cluster_distance[l+1]);
+                        console.log("ajudsted distance:" + cluster_distance_ajusted)
                         myGraph.nodes.push({id: eachGameRelatedGames[l].id, label: eachGameRelatedGames[l].name});
-                        myGraph.edges.push({id: 'e' + relatedGames[j].id + 'e' + eachGameRelatedGames[l].id, source: relatedGames[j].id, target: eachGameRelatedGames[l].id, label: "SEES", weight:cluster_distance[l+1]});   
+                        myGraph.edges.push({id: 'e' + relatedGames[j].id + 'e' + eachGameRelatedGames[l].id, source: relatedGames[j].id, target: eachGameRelatedGames[l].id, label: "SEES", weight:-cluster_distance_ajusted});   
                     }
                 }
                 
@@ -607,7 +609,7 @@ class App extends Component {
                     <Sigma id="sigmaGraph" style={{ width:"100%", height:"100%" }} onClickNode={this.handleGraphNodeClick} graph={this.state.graphJson} settings={{drawEdges: true, clone: false}}>
                         <RelativeSize initialSize={1}/>
                         <RandomizeNodePositions/>
-                        <ForceLink  nodeSiblingsAngleMin={angle} edgeWeightInfluence={4}/* this attracts nodes connected with edges of positive weight edgeWeightInfluence={2}*//>
+                        <ForceLink nodeSiblingsAngleMin={angle} edgeWeightInfluence={4}/* this attracts nodes connected with edges of positive weight edgeWeightInfluence={2}*//>
                     </Sigma>
                 )
             }
