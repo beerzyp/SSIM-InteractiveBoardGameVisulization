@@ -241,7 +241,7 @@ class App extends Component {
                 });
 
                 let eachGameRelatedGames = [];                      //Initialize variable that will hold the games related to each of the main game's related games
-
+                console.log(queryDataEachRelatedGame);
                 let k = 0;
                 while(k < queryDataEachRelatedGame.results.length)  //Push all related games inside queryDataEachRelatedGame.results to eachGameRelatedGames variable
                 { 
@@ -422,19 +422,94 @@ class App extends Component {
             .catch(err => {
                 console.error(err);
             });
-            console.log(allRelatedGames)
+            console.log(relatedDistances);
+            console.log(allRelatedGames);
             //For each game related to the main game, add node and edges to graph (if unique) and process its own related games
             console.log(item.name);
             for(let j = 0; j < allRelatedGames.length; j++) 
             {
                 let doesNodeExist = false;
                 let doesEdgeExist = false;
-                const game = allRelatedGames[j][0];
+                /*const game = allRelatedGames[j][0];
                 const related_games = allRelatedGames[j][1];
                 console.log(j);
-                console.log(game.name);
-                for (let m = 0; m < related_games.length; m++) {
+                console.log(game.name);*/
+                for(let m = 0; m < myGraph.nodes.length; m++)               //Seach all existent nodes
+                {
+                    if(relatedGames[j].id === myGraph.nodes[m].id)          //If current game's id matches an existing node's id, don't add node and process edges
+                    {
+                        for(let o = 0; o < myGraph.edges.length; o++)       //Search all existent edges
+                        {
+                            //If existing game node already has an edge connecting to main game, dont add edge
+                            if(('e' + relatedGames[j].id + 'e' + item.id === myGraph.edges[o].id) || ('e' + item.id + 'e' + relatedGames[j].id === myGraph.edges[o].id))
+                            {  
+                                doesEdgeExist = true;
+                                break;
+                            }
+
+                        }
+                        if(!doesEdgeExist)      //Add edge
+                        {
+                            myGraph.edges.push({id: 'e' + item.id + 'e' + myGraph.nodes[m].id, source: item.id, target: myGraph.nodes[m].id, label: "SEES", weight:0});
+                        }
+                        doesNodeExist = true;
+                        break;
+                    }
                 }
+
+                if(!doesNodeExist)              //Add node and edge
+                {
+                    myGraph.nodes.push({id: relatedGames[j].id, label: relatedGames[j].name});
+                    myGraph.edges.push({id: 'e' + item.id + 'e' + relatedGames[j].id, source: item.id, target: relatedGames[j].id, label: "SEES",weight:-1});
+                }
+
+                let eachGameRelatedGames = [];                      //Initialize variable that will hold the games related to each of the main game's related games
+                const related_games = allRelatedGames[j][1];
+                let k = 0;
+                while(k < related_games.length)  //Push all related games inside queryDataEachRelatedGame.results to eachGameRelatedGames variable
+                { 
+                    let eachGame = related_games[k];
+                    eachGameRelatedGames.push(eachGame);
+                    k++;
+                }
+                const cluster_distance = relatedDistances[j];
+                console.log(cluster_distance);
+                //For each game related to the main game's related games, add node and edges to graph (if unique)
+                for(let l = 0; l < eachGameRelatedGames.length; l++) 
+                {
+                    let doesNodeExistPhaseTwo = false;
+                    let doesEdgeExistPhaseTwo = false;
+
+                    for(let n = 0; n < myGraph.nodes.length; n++)        //Seach all existent nodes
+                    {
+                        if(eachGameRelatedGames[l].id === myGraph.nodes[n].id)  //If current game's id matches an existing node's id, don't add node and process edges
+                        {
+                            for(let p = 0; p < myGraph.edges.length; p++)   //Search all existing edges
+                            {
+                                //If existing game node already has an edge connecting to the current main game's related game, dont add edge
+                                if(('e' + eachGameRelatedGames[l].id + 'e' + relatedGames[j].id === myGraph.edges[p].id) || ('e' + relatedGames[j].id + 'e' + eachGameRelatedGames[l].id === myGraph.edges[p].id))
+                                {  
+                                    doesEdgeExistPhaseTwo = true;
+                                    break;
+                                }
+                            }
+                            if(!doesEdgeExistPhaseTwo)      //Add edge
+                            {
+                                myGraph.edges.push({id: 'e' + relatedGames[j].id + 'e' + myGraph.nodes[n].id, source: relatedGames[j].id, target: myGraph.nodes[n].id, label: "SEES"});
+                            }
+                            doesNodeExistPhaseTwo = true;
+                            break;
+                        }
+                    }
+    
+                    if(!doesNodeExistPhaseTwo)              //Add node and edge
+                    {
+                        console.log(eachGameRelatedGames[l].name + " distance: " + cluster_distance[l+1]);
+                        myGraph.nodes.push({id: eachGameRelatedGames[l].id, label: eachGameRelatedGames[l].name});
+                        myGraph.edges.push({id: 'e' + relatedGames[j].id + 'e' + eachGameRelatedGames[l].id, source: relatedGames[j].id, target: eachGameRelatedGames[l].id, label: "SEES", weight:cluster_distance[l+1]});   
+                    }
+                }
+                
             }
             console.log("In Algorithm 3: Success!");
             //console.log(myGraph);
@@ -444,7 +519,6 @@ class App extends Component {
 
         this.setState({ isLoading: false, graphJson: myGraph, isGraphBuilt: true, gameIdPreviousGraphBuilt: item.id, previouslySelectedSearch: this.state.selectedSearch });
     }
-
 
 
     displaySideBarInformation() {
@@ -523,17 +597,17 @@ class App extends Component {
 
 
     displayGraph(flag) {
-        flag = 'forcelink_distances';
+        flag = 'default';
+        const angle = Math.PI/2-0.01;
+        console.log(angle);
         if(this.state.isGraphBuilt) {
             if(flag === 'default')
             {
                 return (
                     <Sigma id="sigmaGraph" style={{ width:"100%", height:"100%" }} onClickNode={this.handleGraphNodeClick} graph={this.state.graphJson} settings={{drawEdges: true, clone: false}}>
-                        <RelativeSize initialSize={15}/>
+                        <RelativeSize initialSize={1}/>
                         <RandomizeNodePositions/>
-                        <EdgeShapes default="tapered"/>
-                        <NodeShapes default="star"/>
-                        <ForceLink easing="cubicInOut" gravity={2} nodeSiblingsAngleMin={1} /* this attracts nodes connected with edges of positive weight edgeWeightInfluence={2}*//>
+                        <ForceLink  nodeSiblingsAngleMin={angle} edgeWeightInfluence={4}/* this attracts nodes connected with edges of positive weight edgeWeightInfluence={2}*//>
                     </Sigma>
                 )
             }
@@ -545,7 +619,7 @@ class App extends Component {
                         <RandomizeNodePositions/>
                         <EdgeShapes default="tapered"/>
                         <NodeShapes default="star"/>
-                        <ForceLink easing="cubicInOut" gravity={2} nodeSiblingsAngleMin={1} edgeWeightInfluence={2} /* this attracts nodes connected with edges of positive weight edgeWeightInfluence={2}*//>
+                        <ForceLink easing="cubicInOut" gravity={2} nodeSiblingsAngleMin={1} edgeWeightInfluence={4} /* this attracts nodes connected with edges of positive weight edgeWeightInfluence={2}*//>
                     </Sigma>
                 )
             }
