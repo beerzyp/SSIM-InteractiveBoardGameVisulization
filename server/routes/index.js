@@ -24,24 +24,24 @@ router.get('/', function(req, res, next) {
 router.post('/gameSearch', function (req, res) {
   const somePath = 'public/clustering.py';
   const correctedPath = path.normalize(path.resolve(somePath));
-  const singleQuote = "'";
-  chunks = chunkSubstr(req.body.games,30000);
+  const singleQuote = "'";  
+  //chunks = chunkSubstr(req.body.games,30000);
   var pyshell = new PythonShell(correctedPath,{pythonPath : 'C:/Users/USER/AppData/Local/Programs/Python/Python37/python.exe'});
-  pyshell.send(JSON.stringify(chunks));
+  pyshell.send(JSON.stringify(req.body.games));
 
   pyshell.on('message', function (message) {
-      // received a message sent from the Python script (a simple "print" statement)
-      console.log(message);
+    res.write(message);
   });
 
-  // end the input stream and allow the process to exit
+   // end the input stream and allow the process to exit
   pyshell.end(function (err) {
-      if (err){
-          throw err;
-      };
-
-      console.log('finished');
+    if (err){
+        throw err;
+    };
+    console.log('finished');
+    res.end();
   });
+
 });
 
 
