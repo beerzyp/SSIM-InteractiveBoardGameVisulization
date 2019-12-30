@@ -289,7 +289,7 @@ class App extends Component {
                         }
                         if(!doesEdgeExist)      //Add edge
                         {
-                            myGraph.edges.push({id: 'e' + item.id + 'e' + myGraph.nodes[m].id, source: item.id, target: myGraph.nodes[m].id, label: "SEES", color: '#e4e4e4', weight: 4});
+                            myGraph.edges.push({id: 'e' + item.id + 'e' + myGraph.nodes[m].id, source: item.id, target: myGraph.nodes[m].id, label: "SEES", color: '#e4e4e4'/*, weight: 4*/});
                         }
                         doesNodeExist = true;
                         break;
@@ -301,7 +301,7 @@ class App extends Component {
                     let eachNodeSize = this.getNodeSize(relatedGames[j]);
                     let eachNodeColor = this.getNodeColor(relatedGames[j]);
                     myGraph.nodes.push({id: relatedGames[j].id, label: relatedGames[j].name, size: eachNodeSize, color: eachNodeColor});
-                    myGraph.edges.push({id: 'e' + item.id + 'e' + relatedGames[j].id, source: item.id, target: relatedGames[j].id, label: "SEES", color: '#e4e4e4', weight: 4});
+                    myGraph.edges.push({id: 'e' + item.id + 'e' + relatedGames[j].id, source: item.id, target: relatedGames[j].id, label: "SEES", color: '#e4e4e4'/*, weight: 4*/});
                 }
 
                 let queryDataEachRelatedGame = [];                      //Initialize variable that will hold the query response    
@@ -347,7 +347,7 @@ class App extends Component {
                             }
                             if(!doesEdgeExistPhaseTwo)      //Add edge
                             {
-                                myGraph.edges.push({id: 'e' + relatedGames[j].id + 'e' + myGraph.nodes[n].id, source: relatedGames[j].id, target: myGraph.nodes[n].id, label: "SEES", color: '#e4e4e4', weight: -1});
+                                myGraph.edges.push({id: 'e' + relatedGames[j].id + 'e' + myGraph.nodes[n].id, source: relatedGames[j].id, target: myGraph.nodes[n].id, label: "SEES", color: '#e4e4e4'/*, weight: -1*/});
                             }
                             doesNodeExistPhaseTwo = true;
                             break;
@@ -359,7 +359,7 @@ class App extends Component {
                         let eachNodeSize = this.getNodeSize(eachGameRelatedGames[l]);
                         let eachNodeColor = this.getNodeColor(eachGameRelatedGames[l]);
                         myGraph.nodes.push({id: eachGameRelatedGames[l].id, label: eachGameRelatedGames[l].name, size: eachNodeSize, color: eachNodeColor});
-                        myGraph.edges.push({id: 'e' + relatedGames[j].id + 'e' + eachGameRelatedGames[l].id, source: relatedGames[j].id, target: eachGameRelatedGames[l].id, label: "SEES", color: '#e4e4e4', weight: -1});   
+                        myGraph.edges.push({id: 'e' + relatedGames[j].id + 'e' + eachGameRelatedGames[l].id, source: relatedGames[j].id, target: eachGameRelatedGames[l].id, label: "SEES", color: '#e4e4e4'/*, weight: -1*/});   
                     }
                 }
                 
