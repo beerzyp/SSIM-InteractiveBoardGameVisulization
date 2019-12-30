@@ -1,14 +1,41 @@
 import React, { Component } from 'react';
 import { Col, Row } from 'reactstrap';
 import { Sigma, RandomizeNodePositions, EdgeShapes, NodeShapes, RelativeSize } from 'react-sigma';
-import ForceLink from 'react-sigma/lib/ForceLink'
+import ForceLink from 'react-sigma/lib/ForceLink';
+import ForceAtlas2 from 'react-sigma/lib/ForceAtlas2';
 import axios from 'axios';
-
+import { makeStyles } from '@material-ui/core/styles';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormLabel from '@material-ui/core/FormLabel';
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import './App.scss';
 
 //var sigma = require("sigma-js");
+const useStyles = makeStyles({
+    root: {
+      flexGrow: 1,
+    },
+  });
 
+export function CenteredTabs() {
+    const [setValue] = React.useState(0);
+    
+    const handleChange = (event, newValue) => {
+        setValue(newValue);
+    };
+}
 
+export function RadioButtonsGroup() {
+    const [setValue] = React.useState('algorithm1');
+  
+    const handleChange = event => {
+      setValue(event.target.value);
+    };
+}
 
 class App extends Component {
     constructor(props) {    
@@ -17,6 +44,7 @@ class App extends Component {
             searchName: "",
             previouslySearchedName: "",
             selectedSearch: "Algorithm 1",
+            selectedLayout: "Force Atlas 2",
             previouslySelectedSearch: null,
             searchNameWasSubmitted: false,
             searchItemsResults: [],
@@ -25,12 +53,12 @@ class App extends Component {
             previousNodeClickedId: "",
             graphJson: null,
             isGraphBuilt: false,
-            gameIdPreviousGraphBuilt: "",
-            displayAlgorithm:'default'
+            gameIdPreviousGraphBuilt: ""
         };
 
         this.handleChangeSearch = this.handleChangeSearch.bind(this);
-        this.handleChangeSelect = this.handleChangeSelect.bind(this);
+        this.handleChangeAlgoSelect = this.handleChangeAlgoSelect.bind(this);
+        this.handleChangeLayoutSelect = this.handleChangeLayoutSelect.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
 
         this.getNodeSize = this.getNodeSize.bind(this);
@@ -51,8 +79,12 @@ class App extends Component {
     }
 
 
-    handleChangeSelect(event) {
+    handleChangeAlgoSelect(event) {
         this.setState({ selectedSearch: event.target.value });
+    }
+
+    handleChangeLayoutSelect(event) {
+        this.setState({ selectedLayout: event.target.value });
     }
 
 
@@ -180,7 +212,7 @@ class App extends Component {
 
         //this.setState({ isLoading: true, isGraphBuilt: false });
         //let myGraph = [];
-
+        console.log(this.state.selectedSearch);
         if(this.state.selectedSearch === "Algorithm 1")
         {
             console.log("Algorithm 1");
@@ -190,11 +222,6 @@ class App extends Component {
         {
             console.log("Algorithm 2");
            /*myGraph = */this.buildGraphAlgorithm2(item);
-        }
-        else if(this.state.selectedSearch === "Algorithm 3")
-        {
-            console.log("Algorithm 3");
-           /*myGraph = */this.buildGraphAlgorithm3(item);
         }
 
         //this.handleGraphNodeClick(null, item);
@@ -355,54 +382,7 @@ class App extends Component {
         this.setState({ isLoading: false, graphJson: myGraph, isGraphBuilt: true, gameIdPreviousGraphBuilt: item.id, previouslySelectedSearch: this.state.selectedSearch, displayAlgorithm:'default' });
     }
 
-
     async buildGraphAlgorithm2(item) {
-        // console.log([relatedGames[j],eachGameRelatedGames]);
-        this.setState({ isLoading: true, isGraphBuilt: false });
-
-        let myGraph = [];
-
-        //TODO: Build the graph here  
-        await axios.get('https://api.rawg.io/api/games/' + item.id + '/suggested?page_size=15')
-            .then((response) => {
-                
-                //console.log(response.data);
-            })
-            .catch(err => {
-                console.log(err);
-                return null;
-            });
-          
-            
-        /*let*/ myGraph = {nodes:[], edges:[]};
-        //let myGraph = {nodes:[{id:"1406", label:"Monopoly"}, {id:"1407", label:"Whatever"}], edges:[{id:"e1",source:"1406",target:"1407",label:"SEES"}]};
-
-        //Just an example of a graph built out of the other searched results
-        let items = this.state.searchItemsResults;
-
-        //console.log(myGraph);
-
-        for(let i = 0; i < items.length; i++)
-        {
-            myGraph.nodes.push({id:items[i].id, label:items[i].name});
-            if(i !== 0)
-            {
-                myGraph.edges.push({id:'e' + items[i].id, source: items[0].id, target:items[i].id, label:"SEES"});
-            }
-        }
-        
-
-        //this.setState({ graphJson: myGraph })
-
-        this.handleGraphNodeClick(null, item);
-
-        this.setState({ isLoading: false, graphJson: myGraph, isGraphBuilt: true, gameIdPreviousGraphBuilt: item.id, previouslySelectedSearch: this.state.selectedSearch, displayAlgorithm:'default' });
-
-            
-    }
-
-
-    async buildGraphAlgorithm3(item) {
 
         this.setState({ isLoading: true, isGraphBuilt: false });
 
@@ -576,7 +556,7 @@ class App extends Component {
                 }
                 
             }
-            console.log("In Algorithm 3: Success!");
+            console.log("In Algorithm 2: Success!");
             //console.log(myGraph);
         }                
 
@@ -663,23 +643,17 @@ class App extends Component {
 
     displayGraph() {
         const angle = Math.PI/3;
-        console.log(angle);
         if(this.state.isGraphBuilt) {
-            if(this.state.displayAlgorithm === 'default')
+            if(this.state.selectedLayout === 'Force Atlas 2')
             {
                 return (
                     <Sigma id="sigmaGraph" style={{ width:"100%", height:"100%" }} onClickNode={this.handleGraphNodeClick} graph={this.state.graphJson} settings={{ drawEdges: true, clone: false }}>
-                   
-                    <RandomizeNodePositions/>
-                    { /* These only work with canvas render, which we aren't using. WEBGL is better I guess*/}
-                    <EdgeShapes default="line"/> 
-                    <NodeShapes default="circle"/>
-                   
-                    <ForceLink easing="cubicInOut" gravity={2} nodeSiblingsAngleMin={1} /* this attracts nodes connected with edges of positive weight*/ edgeWeightInfluence={4}/>
+                    <RandomizeNodePositions/>                   
+                    <ForceAtlas2 easing="cubicInOut" gravity={2} /* this attracts nodes connected with edges of positive weight*/ edgeWeightInfluence={4}/>
                 </Sigma>
                 )
             }
-            else if(this.state.displayAlgorithm === 'forcelink_distances')
+            else if(this.state.selectedLayout === 'Force Link')
             {
                 return (
                     <Sigma id="sigmaGraph" style={{ width:"100%", height:"100%" }} onClickNode={this.handleGraphNodeClick} graph={this.state.graphJson} settings={{drawEdges: true, clone: false}}>
@@ -691,70 +665,41 @@ class App extends Component {
             }
         }
     }
+    
 
 
     render() {
+          
         return (
             <div id="containerDiv">
                 <Col id="sideBar">
                     <header>
-                        Board Game Network
+                        Video Game Network
                     </header>
-                    <h3>
-                        Prototype
-                    </h3>
-                    <p>
-                        Blablablabla, colocar nome do board game na search bar, blablabla, será criado um grafo com os board games
-                        relacionados para fácil visualização, blablabla. Node color conveys the game rating and node size conveys popularity
-                    </p>
-                    <p>
-                        Yes, the loading wheel is pizza... (I'm hungry ok?!)
-                    </p>
-                    <form onSubmit={this.handleSubmit}>
-                        <label>
-                            <ul>
-                                <li>
-                                    <label>
-                                        <input
-                                            type="radio"
-                                            value="Algorithm 1"
-                                            checked={this.state.selectedSearch === "Algorithm 1"}
-                                            onChange={this.handleChangeSelect}
-                                        />
-                                        Algorithm 1
-                                    </label>
-                                    </li>
-                                    
-                                    <li>
-                                        <label>
-                                            <input
-                                            type="radio"
-                                            value="Algorithm 2"
-                                            checked={this.state.selectedSearch === "Algorithm 2"}
-                                            onChange={this.handleChangeSelect}
-                                            />
-                                            Algorithm 2
-                                        </label>
-                                    </li>
+                    <br></br>
+                        <form onSubmit={this.handleSubmit}>
+                            <FormLabel component="legend">Graph Layout 
+                                <Button>
+                                    <InfoOutlinedIcon className="info" />
+                                </Button>
+                            </FormLabel>
+                            <RadioGroup aria-label="Graph Layout" name="graphlayout" value={RadioButtonsGroup.value} onChange={RadioButtonsGroup.handleChange}>
+                                <FormControlLabel className="formlab" value="Force Atlas 2" control={<Radio />} label="Force Atlas 2" onChange={this.handleChangeLayoutSelect} />
+                                <FormControlLabel className="formlab" value="Force Link" control={<Radio />} label="Force Link" onChange={this.handleChangeLayoutSelect} />
+                            </RadioGroup>
+                            <FormLabel component="legend">Algorithm
+                                <Button>
+                                    <InfoOutlinedIcon className="info" />
+                                </Button>
+                            </FormLabel>
+                            <RadioGroup aria-label="Algorithm" name="algorithm" value={RadioButtonsGroup.value} onChange={RadioButtonsGroup.handleChange}>
+                                <FormControlLabel className="formlab" value="Algorithm 1" control={<Radio />} label="Algorithm 1" onChange={this.handleChangeAlgoSelect} />
+                                <FormControlLabel className="formlab" value="Algorithm 2" control={<Radio />} label="Algorithm 2" onChange={this.handleChangeAlgoSelect} />
+                            </RadioGroup>
 
-                                    <li>
-                                        <label>
-                                            <input
-                                            type="radio"
-                                            value="Algorithm 3"
-                                            checked={this.state.selectedSearch === "Algorithm 3"}
-                                            onChange={this.handleChangeSelect}
-                                            />
-                                            Algorithm 3
-                                        </label>
-                                    </li>
-                            </ul>
-
-                            <input type="text" value={this.state.searchName} onChange={this.handleChangeSearch} />
-                        </label>
-                        <input type="submit" value="Submit" />
-                    </form>
-
+                            <TextField id="standard-basic" label="Game" value={this.state.searchName}  onChange={this.handleChangeSearch}/>
+                            <Button variant="contained" type="submit">Submit</Button>
+                        </form>
                     {this.displaySideBarInformation()}
 
                 </Col> 
