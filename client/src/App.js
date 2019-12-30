@@ -648,6 +648,7 @@ class App extends Component {
             {
                 return (
                     <Sigma id="sigmaGraph" style={{ width:"100%", height:"100%" }} onClickNode={this.handleGraphNodeClick} graph={this.state.graphJson} settings={{ drawEdges: true, clone: false }}>
+                    <RelativeSize initialSize={1}/>
                     <RandomizeNodePositions/>                   
                     <ForceAtlas2 easing="cubicInOut" gravity={2} /* this attracts nodes connected with edges of positive weight*/ edgeWeightInfluence={4}/>
                 </Sigma>
