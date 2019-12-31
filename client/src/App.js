@@ -13,6 +13,8 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormLabel from '@material-ui/core/FormLabel';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import MultiSearchSelect from "react-search-multi-select";
+import Typography from '@material-ui/core/Typography';
+import Slider from '@material-ui/core/Slider';
 import './App.scss';
 
 //var sigma = require("sigma-js");
@@ -75,13 +77,14 @@ class App extends Component {
             graphJson: null,
             isGraphBuilt: false,
             gameIdPreviousGraphBuilt: "",
+            numberOfGames: 18,
             selectedCategories: []
         };
 
         this.handleChangeSearch = this.handleChangeSearch.bind(this);
         this.handleChangeAlgoSelect = this.handleChangeAlgoSelect.bind(this);
         this.handleChangeLayoutSelect = this.handleChangeLayoutSelect.bind(this);
-        //this.handleChangeCategorySelect = this.handleChangeCategorySelect.bind(this);
+        this.handleChangeNumOfGames = this.handleChangeNumOfGames.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
 
         this.getNodeSize = this.getNodeSize.bind(this);
@@ -110,9 +113,13 @@ class App extends Component {
         this.setState({ selectedLayout: event.target.value });
     }
 
+    handleChangeNumOfGames(event) {
+        this.setState({ numberOfGames: parseInt(event.target.innerText)});
+    }
+
     handleChangeCategorySelect = (arr) => {
         this.state.selectedCategories = arr;
-      }
+    }
 
     async handleSubmit(event) {
         event.preventDefault();
@@ -237,7 +244,6 @@ class App extends Component {
 
         //this.setState({ isLoading: true, isGraphBuilt: false });
         //let myGraph = [];
-        console.log(this.state.selectedSearch);
         if(this.state.selectedSearch === "Algorithm 1")
         {
             console.log("Algorithm 1");
@@ -262,7 +268,7 @@ class App extends Component {
         let myGraph = { nodes:[], edges:[] };       //Initialize graph variable
         let queryData = [];                         //Initialize variable that will hold the query response
               
-        await axios.get('https://api.rawg.io/api/games/' + item.id + '/suggested?page_size=18')
+        await axios.get('https://api.rawg.io/api/games/' + item.id + '/suggested?page_size=' + this.state.numberOfGames)
             .then((response) => {
 
                 queryData = response.data;          //queryData holds the related games to the main game
@@ -331,7 +337,7 @@ class App extends Component {
 
                 let queryDataEachRelatedGame = [];                      //Initialize variable that will hold the query response    
 
-                await axios.get('https://api.rawg.io/api/games/' + relatedGames[j].id + '/suggested?page_size=18')
+                await axios.get('https://api.rawg.io/api/games/' + relatedGames[j].id + '/suggested?page_size=' + this.state.numberOfGames)
                 .then((response) => {
 
                     queryDataEachRelatedGame = response.data;           //queryDataEachRelatedGame holds the related games to each of the main game's related games
@@ -342,7 +348,6 @@ class App extends Component {
                 });
 
                 let eachGameRelatedGames = [];                      //Initialize variable that will hold the games related to each of the main game's related games
-                console.log(queryDataEachRelatedGame);
                 let k = 0;
                 while(k < queryDataEachRelatedGame.results.length)  //Push all related games inside queryDataEachRelatedGame.results to eachGameRelatedGames variable
                 { 
@@ -395,12 +400,6 @@ class App extends Component {
             //console.log(myGraph);
         }    
         
-        
-        for(let a = 0; a < myGraph.edges.length; a++) {
-            console.log("Graph edges weight");
-            console.log(myGraph.edges[a].weight)
-        }
-        
 
         this.handleGraphNodeClick(null, item);              //Show game on side bar
 
@@ -414,7 +413,7 @@ class App extends Component {
         let myGraph = { nodes:[], edges:[] };       //Initialize graph variable
         let queryData = [];                         //Initialize variable that will hold the query response
               
-        await axios.get('https://api.rawg.io/api/games/' + item.id + '/suggested?page_size=18')
+        await axios.get('https://api.rawg.io/api/games/' + item.id + '/suggested?page_size=' + this.state.numberOfGames)
             .then((response) => {
 
                 queryData = response.data;          //queryData holds the related games to the main game
@@ -449,7 +448,7 @@ class App extends Component {
             {
                 let queryDataEachRelatedGame = [];                      //Initialize variable that will hold the query response    
     
-                await axios.get('https://api.rawg.io/api/games/' + relatedGames[j].id + '/suggested?page_size=18')
+                await axios.get('https://api.rawg.io/api/games/' + relatedGames[j].id + '/suggested?page_size=' + this.state.numberOfGames)
                 .then((response) => {
     
                     queryDataEachRelatedGame = response.data;           //queryDataEachRelatedGame holds the related games to each of the main game's related games
@@ -494,10 +493,7 @@ class App extends Component {
             {
                 let doesNodeExist = false;
                 let doesEdgeExist = false;
-                /*const game = allRelatedGames[j][0];
-                const related_games = allRelatedGames[j][1];
-                console.log(j);
-                console.log(game.name);*/
+
                 for(let m = 0; m < myGraph.nodes.length; m++)               //Seach all existent nodes
                 {
                     if(relatedGames[j].id === myGraph.nodes[m].id)          //If current game's id matches an existing node's id, don't add node and process edges
@@ -582,7 +578,6 @@ class App extends Component {
                 
             }
             console.log("In Algorithm 2: Success!");
-            //console.log(myGraph);
         }                
 
         this.handleGraphNodeClick(null, item);              //Show game on side bar
@@ -728,8 +723,13 @@ class App extends Component {
             }
         }
     }
-    
 
+    /*
+        Runs on every page update, to scroll down
+    */
+    componentDidUpdate(){
+        this.refs.scrolldown.scrollIntoView();
+    }
 
     render() {
         const categories = [
@@ -739,7 +739,7 @@ class App extends Component {
         'educational', 'card'
         ];
         return (
-            <div id="containerDiv">
+            <div id="containerDiv" ref="wrap">
                 <Col id="sideBar">
                     <header>
                         Video Game Network
@@ -766,7 +766,22 @@ class App extends Component {
                             </RadioGroup>
                             <div className="optionsfilter" style={{display: 'inline-block', width: 'fit-content'}}>
                                 <br></br>
-                                <FormLabel component="legend">Categories
+                                
+                                <Typography id="discrete-slider" gutterBottom>
+                                    Number Of Games
+                                </Typography>
+                                <Slider
+                                    defaultValue={18}
+                                    aria-labelledby="discrete-slider"
+                                    valueLabelDisplay="auto"
+                                    step={10}
+                                    marks
+                                    min={18}
+                                    max={110}
+                                    onChange={this.handleChangeNumOfGames}
+                                />
+
+                                <FormLabel component="legend">Genres
                                 </FormLabel>
                                     <MultiSearchSelect searchable={true} showTags={true} multiSelect={true} onSelect={this.handleChangeCategorySelect} options={categories}/>
                                 <br></br>
@@ -805,6 +820,7 @@ class App extends Component {
                         {/*</div>*/}
 
                 </Col>
+            <div ref="scrolldown"></div>
             </div>
         );
     }
