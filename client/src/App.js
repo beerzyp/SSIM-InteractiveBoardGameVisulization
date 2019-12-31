@@ -4,7 +4,7 @@ import { Sigma, RandomizeNodePositions, EdgeShapes, NodeShapes, RelativeSize } f
 import ForceLink from 'react-sigma/lib/ForceLink';
 import ForceAtlas2 from 'react-sigma/lib/ForceAtlas2';
 import axios from 'axios';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import TextField from '@material-ui/core/TextField';
@@ -12,6 +12,7 @@ import Button from '@material-ui/core/Button';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormLabel from '@material-ui/core/FormLabel';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import MultiSearchSelect from "react-search-multi-select";
 import './App.scss';
 
 //var sigma = require("sigma-js");
@@ -37,6 +38,26 @@ export function RadioButtonsGroup() {
     };
 }
 
+export function MultipleSelect() {
+    const [setState] = React.useState([]);
+  
+    const handleChange = event => {
+        setState(event.target.value);
+    };
+  
+    const handleChangeMultiple = event => {
+      const { options } = event.target;
+      const value = [];
+      for (let i = 0, l = options.length; i < l; i += 1) {
+        if (options[i].selected) {
+          value.push(options[i].value);
+        }
+      }
+      setState(value);
+    };
+      
+}  
+
 class App extends Component {
     constructor(props) {    
         super(props);
@@ -53,12 +74,14 @@ class App extends Component {
             previousNodeClickedId: "",
             graphJson: null,
             isGraphBuilt: false,
-            gameIdPreviousGraphBuilt: ""
+            gameIdPreviousGraphBuilt: "",
+            selectedCategories: []
         };
 
         this.handleChangeSearch = this.handleChangeSearch.bind(this);
         this.handleChangeAlgoSelect = this.handleChangeAlgoSelect.bind(this);
         this.handleChangeLayoutSelect = this.handleChangeLayoutSelect.bind(this);
+        //this.handleChangeCategorySelect = this.handleChangeCategorySelect.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
 
         this.getNodeSize = this.getNodeSize.bind(this);
@@ -87,6 +110,9 @@ class App extends Component {
         this.setState({ selectedLayout: event.target.value });
     }
 
+    handleChangeCategorySelect = (arr) => {
+        this.state.selectedCategories = arr;
+      }
 
     async handleSubmit(event) {
         event.preventDefault();
@@ -122,7 +148,6 @@ class App extends Component {
 
 
     getNodeColor(item) {
-
         let itemRating = item.rating;   
         if(itemRating >= 0 && itemRating <= 1.5)
         {
@@ -257,7 +282,7 @@ class App extends Component {
             let relatedGames = [];                                      //Initialize variable that will hold the games related to the main game
 
             let mainNodeSize = this.getNodeSize(item);
-            myGraph.nodes.push({id:item.id, label:item.name, color: 'black', size: mainNodeSize});          //Push main game node to graph
+            myGraph.nodes.push({id:item.id, label:item.name, color: 'black', size: mainNodeSize, category:item.genres});          //Push main game node to graph
 
             let i = 0;
             while(i < queryData.results.length)                         //Push all related games inside queryData.results to relatedGames variable
@@ -300,7 +325,7 @@ class App extends Component {
                 {
                     let eachNodeSize = this.getNodeSize(relatedGames[j]);
                     let eachNodeColor = this.getNodeColor(relatedGames[j]);
-                    myGraph.nodes.push({id: relatedGames[j].id, label: relatedGames[j].name, size: eachNodeSize, color: eachNodeColor});
+                    myGraph.nodes.push({id: relatedGames[j].id, label: relatedGames[j].name, size: eachNodeSize, color: eachNodeColor, category:item.genres});
                     myGraph.edges.push({id: 'e' + item.id + 'e' + relatedGames[j].id, source: item.id, target: relatedGames[j].id, label: "SEES", color: '#e4e4e4'/*, weight: 4*/});
                 }
 
@@ -358,7 +383,7 @@ class App extends Component {
                     {
                         let eachNodeSize = this.getNodeSize(eachGameRelatedGames[l]);
                         let eachNodeColor = this.getNodeColor(eachGameRelatedGames[l]);
-                        myGraph.nodes.push({id: eachGameRelatedGames[l].id, label: eachGameRelatedGames[l].name, size: eachNodeSize, color: eachNodeColor});
+                        myGraph.nodes.push({id: eachGameRelatedGames[l].id, label: eachGameRelatedGames[l].name, size: eachNodeSize, color: eachNodeColor, category:item.genres});
                         myGraph.edges.push({id: 'e' + relatedGames[j].id + 'e' + eachGameRelatedGames[l].id, source: relatedGames[j].id, target: eachGameRelatedGames[l].id, label: "SEES", color: '#e4e4e4'/*, weight: -1*/});   
                     }
                 }
@@ -408,7 +433,7 @@ class App extends Component {
         {
             let relatedGames = [];                                      //Initialize variable that will hold the games related to the main game
 
-            myGraph.nodes.push({id:item.id, label:item.name});          //Push main game node to graph
+            myGraph.nodes.push({id:item.id, label:item.name, category:item.genres});          //Push main game node to graph
 
             let i = 0;
             while(i < queryData.results.length)                         //Push all related games inside queryData.results to relatedGames variable
@@ -500,7 +525,7 @@ class App extends Component {
                 {
                     let eachNodeSize = this.getNodeSize(relatedGames[j]);
                     let eachNodeColor = this.getNodeColor(relatedGames[j]);
-                    myGraph.nodes.push({id: relatedGames[j].id, label: relatedGames[j].name, size:eachNodeSize, color:eachNodeColor});
+                    myGraph.nodes.push({id: relatedGames[j].id, label: relatedGames[j].name, size:eachNodeSize, color:eachNodeColor, category:item.genres});
                     myGraph.edges.push({id: 'e' + item.id + 'e' + relatedGames[j].id, source: item.id, target: relatedGames[j].id, label: "SEES",weight:1});
                 }
 
@@ -550,7 +575,7 @@ class App extends Component {
                         console.log("ajudsted distance:" + cluster_distance_ajusted)
                         let eachNodeSize = this.getNodeSize(relatedGames[l]);
                         let eachNodeColor = this.getNodeColor(relatedGames[l]);
-                        myGraph.nodes.push({id: eachGameRelatedGames[l].id, label: eachGameRelatedGames[l].name, size:eachNodeSize, color:eachNodeColor});
+                        myGraph.nodes.push({id: eachGameRelatedGames[l].id, label: eachGameRelatedGames[l].name, size:eachNodeSize, color:eachNodeColor, category:item.genres});
                         myGraph.edges.push({id: 'e' + relatedGames[j].id + 'e' + eachGameRelatedGames[l].id, source: relatedGames[j].id, target: eachGameRelatedGames[l].id, label: "SEES", weight:-cluster_distance_ajusted});   
                     }
                 }
@@ -641,11 +666,47 @@ class App extends Component {
     }
 
 
+    selectCategories(){
+        let filteredJson = this.state.graphJson.nodes;
+        let mostCommon = [];
+        for (let index = filteredJson.length-1; index >= 0; index--) {
+            let includes = false;
+            const categories = filteredJson[index].category;
+            for (let idx = 0; idx < categories.length; idx++) {
+                mostCommon.push(categories[idx].name.toLowerCase());
+                if(this.state.selectedCategories.includes(categories[idx].name.toLowerCase())) {
+                    includes = true;
+                    break;
+                }
+                
+            }
+            if(!includes) {
+                 filteredJson.splice(index, 1);
+            }
+        }
+        if(filteredJson.length < 1) {
+            let map = {};
+            let mostFrequentElement = mostCommon[0];
+            for(let i = 0; i<mostCommon.length; i++){
+                if(!map[mostCommon[i]]){
+                    map[mostCommon[i]]=1;
+                }else{
+                    ++map[mostCommon[i]];
+                    if(map[mostCommon[i]]>map[mostFrequentElement]){
+                        mostFrequentElement = mostCommon[i];
+                    }
+                }
+            }
+            if(mostFrequentElement!=undefined)
+                alert("No data for your filters, try choosing the genre " + mostFrequentElement + "...");
+        }
+    }
     displayGraph() {
         const angle = Math.PI/3;
         if(this.state.isGraphBuilt) {
             if(this.state.selectedLayout === 'Force Atlas 2')
             {
+                this.selectCategories();
                 return (
                     <Sigma id="sigmaGraph" style={{ width:"100%", height:"100%" }} onClickNode={this.handleGraphNodeClick} graph={this.state.graphJson} settings={{ drawEdges: true, clone: false }}>
                     <RelativeSize initialSize={1}/>
@@ -656,6 +717,7 @@ class App extends Component {
             }
             else if(this.state.selectedLayout === 'Force Link')
             {
+                this.selectCategories();
                 return (
                     <Sigma id="sigmaGraph" style={{ width:"100%", height:"100%" }} onClickNode={this.handleGraphNodeClick} graph={this.state.graphJson} settings={{drawEdges: true, clone: false}}>
                         <RelativeSize initialSize={1}/>
@@ -670,7 +732,12 @@ class App extends Component {
 
 
     render() {
-          
+        const categories = [
+            'action','indie','adventure','role-playing-games-rpg',
+        'shooter', 'strategy', 'casual', 'simulation', 'arcade', 'puzzle', 'platformer',
+        'racing', 'sports', 'massively-multiplayer', 'family', 'fighting', 'board-games',
+        'educational', 'card'
+        ];
         return (
             <div id="containerDiv">
                 <Col id="sideBar">
@@ -697,9 +764,16 @@ class App extends Component {
                                 <FormControlLabel className="formlab" value="Algorithm 1" control={<Radio />} label="Algorithm 1" onChange={this.handleChangeAlgoSelect} />
                                 <FormControlLabel className="formlab" value="Algorithm 2" control={<Radio />} label="Algorithm 2" onChange={this.handleChangeAlgoSelect} />
                             </RadioGroup>
-
+                            <div className="optionsfilter" style={{display: 'inline-block', width: 'fit-content'}}>
+                                <br></br>
+                                <FormLabel component="legend">Categories
+                                </FormLabel>
+                                    <MultiSearchSelect searchable={true} showTags={true} multiSelect={true} onSelect={this.handleChangeCategorySelect} options={categories}/>
+                                <br></br>
+                            </div>
                             <TextField id="standard-basic" label="Game" value={this.state.searchName}  onChange={this.handleChangeSearch}/>
                             <Button variant="contained" type="submit">Submit</Button>
+
                         </form>
                     {this.displaySideBarInformation()}
 

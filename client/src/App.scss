@@ -94,6 +94,15 @@
   margin-left: 3%;
 }
 
+#sideBar > form > button {
+  margin-top: 2%;
+}
+
+#sideBar > form > div.optionsfilter {
+  border-top: groove;
+  border-bottom: groove;
+}
+
 #nameSearchResults ul {
   margin-bottom: 0px;
 }
