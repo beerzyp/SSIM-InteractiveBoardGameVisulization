@@ -267,7 +267,7 @@ class App extends Component {
 
         let myGraph = { nodes:[], edges:[] };       //Initialize graph variable
         let queryData = [];                         //Initialize variable that will hold the query response
-              
+        console.log(this.state.numberOfGames);
         await axios.get('https://api.rawg.io/api/games/' + item.id + '/suggested?page_size=' + this.state.numberOfGames)
             .then((response) => {
 
@@ -412,7 +412,7 @@ class App extends Component {
 
         let myGraph = { nodes:[], edges:[] };       //Initialize graph variable
         let queryData = [];                         //Initialize variable that will hold the query response
-              
+        console.log(this.state.numberOfGames);
         await axios.get('https://api.rawg.io/api/games/' + item.id + '/suggested?page_size=' + this.state.numberOfGames)
             .then((response) => {
 
@@ -471,16 +471,11 @@ class App extends Component {
             }
 
             let jsonData = JSON.stringify(allRelatedGames);
-            let relatedDistances = [];
+            let relatedDistances;
             await axios
             .post('http://localhost:3001/gameSearch', { games:jsonData})
             .then((response) => {
-                const doubleQuote = '"';
-                relatedDistances = response.data.replace(/'/g, doubleQuote);
-                relatedDistances = JSON.parse(relatedDistances);
-                for (let index = 0; index < relatedDistances.length; index++) {
-                    relatedDistances[index] = JSON.parse(relatedDistances[index]);
-                }
+                relatedDistances = eval(`[${response.data.join()}]`);
             }) 
             .catch(err => {
                 console.error(err);
@@ -534,8 +529,8 @@ class App extends Component {
                     eachGameRelatedGames.push(eachGame);
                     k++;
                 }
-                const cluster_distance = relatedDistances[j];
-                console.log(cluster_distance);
+                let cluster_distance = relatedDistances[j];
+                console.log("j " + j + " " +cluster_distance);
                 //For each game related to the main game's related games, add node and edges to graph (if unique)
                 for(let l = 0; l < eachGameRelatedGames.length; l++) 
                 {
@@ -566,6 +561,10 @@ class App extends Component {
     
                     if(!doesNodeExistPhaseTwo)              //Add node and edge
                     {
+                        console.log(cluster_distance);
+                        if(cluster_distance === undefined) {
+                            cluster_distance = Array(related_games.length).fill(1.0)
+                        }
                         const cluster_distance_ajusted = 1/(cluster_distance[l+1]);
                         console.log(eachGameRelatedGames[l].name + " distance: " + cluster_distance[l+1]);
                         console.log("ajudsted distance:" + cluster_distance_ajusted)

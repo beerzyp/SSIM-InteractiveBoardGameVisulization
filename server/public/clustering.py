@@ -20,6 +20,12 @@ def read_in():
     # Since our input would only be having one line, parse our JSON data from that
     return json.loads(lines[0])
 # Handles rating object returning each type of rating if existent or 0 else
+
+def chunks(lst, n):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
+
 def getRatings(ratings):
     all_ratings = pd.DataFrame(columns=['exceptional','meh','recommended','skip'])
     for i in range(len(ratings)):
@@ -164,7 +170,8 @@ def main():
             'saturated_color', 'short_description', 'ratings', 'platforms','parent_platforms', 'genres']) #for now ignoring platform and parent_platform 
         json_dist = json.dumps(runAlgorithm(clusterDf).tolist(), separators=(',', ':'))
         clusterDists.append(json_dist)
-    print(clusterDists)
+        print(json_dist)
+    print("finish")
     return clusterDists
 # Start process
 if __name__ == '__main__':

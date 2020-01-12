@@ -26,11 +26,16 @@ router.post('/gameSearch', function (req, res) {
   const correctedPath = path.normalize(path.resolve(somePath));
   const singleQuote = "'";  
   //chunks = chunkSubstr(req.body.games,30000);
-  var pyshell = new PythonShell(correctedPath,{pythonPath : 'C:/Users/USER/AppData/Local/Programs/Python/Python37/python.exe'});
+  let pyshell = new PythonShell(correctedPath,{pythonPath : 'C:/Users/USER/AppData/Local/Programs/Python/Python37/python.exe'});
   pyshell.send(JSON.stringify(req.body.games));
-
+  let list = [];
   pyshell.on('message', function (message) {
-    res.write(message);
+    if(message==="finish") {
+      const json = JSON.stringify(list);
+      res.write(json);
+    } else {
+      list.push(message);
+    }
   });
 
    // end the input stream and allow the process to exit
