@@ -30,6 +30,7 @@ router.post('/gameSearch', function (req, res) {
   pyshell.send(JSON.stringify(req.body.games));
   let list = [];
   pyshell.on('message', function (message) {
+    console.log(message);
     if(message==="finish") {
       const json = JSON.stringify(list);
       res.write(json);

@@ -15,6 +15,7 @@ import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import MultiSearchSelect from "react-search-multi-select";
 import Typography from '@material-ui/core/Typography';
 import Slider from '@material-ui/core/Slider';
+import update from 'immutability-helper';
 import './App.scss';
 
 //var sigma = require("sigma-js");
@@ -78,13 +79,17 @@ class App extends Component {
             isGraphBuilt: false,
             gameIdPreviousGraphBuilt: "",
             numberOfGames: 18,
-            selectedCategories: []
+            selectedCategories: ['action','indie','adventure','role-playing-games-rpg',
+            'shooter', 'strategy', 'casual', 'simulation', 'arcade', 'puzzle', 'platformer',
+            'racing', 'sports', 'massively-multiplayer', 'family', 'fighting', 'board-games',
+            'educational', 'card']
         };
 
         this.handleChangeSearch = this.handleChangeSearch.bind(this);
         this.handleChangeAlgoSelect = this.handleChangeAlgoSelect.bind(this);
         this.handleChangeLayoutSelect = this.handleChangeLayoutSelect.bind(this);
         this.handleChangeNumOfGames = this.handleChangeNumOfGames.bind(this);
+        this.handleChangeCategorySelect = this.handleChangeCategorySelect.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
 
         this.getNodeSize = this.getNodeSize.bind(this);
@@ -117,9 +122,14 @@ class App extends Component {
         this.setState({ numberOfGames: parseInt(event.target.innerText)});
     }
 
-    handleChangeCategorySelect = (arr) => {
-        this.state.selectedCategories = arr;
+    handleChangeCategorySelect = (array) => {
+        if(array !== undefined && array.length !== 0){
+            this.setState(
+                state => update(state, {selectedCategories: {$push: [array]}}) 
+            );
+        }
     }
+    
 
     async handleSubmit(event) {
         event.preventDefault();
@@ -475,6 +485,7 @@ class App extends Component {
             await axios
             .post('http://localhost:3001/gameSearch', { games:jsonData})
             .then((response) => {
+                console.log(response.data);
                 relatedDistances = eval(`[${response.data.join()}]`);
             }) 
             .catch(err => {
@@ -529,7 +540,11 @@ class App extends Component {
                     eachGameRelatedGames.push(eachGame);
                     k++;
                 }
-                let cluster_distance = relatedDistances[j];
+                let cluster_distance = [];
+                if(relatedDistances[j] === undefined) {
+                    cluster_distance = Array(related_games.length).fill(1.0)
+                }
+                else cluster_distance = relatedDistances[j];
                 console.log("j " + j + " " +cluster_distance);
                 //For each game related to the main game's related games, add node and edges to graph (if unique)
                 for(let l = 0; l < eachGameRelatedGames.length; l++) 
@@ -562,9 +577,6 @@ class App extends Component {
                     if(!doesNodeExistPhaseTwo)              //Add node and edge
                     {
                         console.log(cluster_distance);
-                        if(cluster_distance === undefined) {
-                            cluster_distance = Array(related_games.length).fill(1.0)
-                        }
                         const cluster_distance_ajusted = 1/(cluster_distance[l+1]);
                         console.log(eachGameRelatedGames[l].name + " distance: " + cluster_distance[l+1]);
                         console.log("ajudsted distance:" + cluster_distance_ajusted)
@@ -678,20 +690,9 @@ class App extends Component {
                  filteredJson.splice(index, 1);
             }
         }
-        if(filteredJson.length < 1) {
-            let map = {};
+        if(filteredJson.length < 2) {
             let mostFrequentElement = mostCommon[0];
-            for(let i = 0; i<mostCommon.length; i++){
-                if(!map[mostCommon[i]]){
-                    map[mostCommon[i]]=1;
-                }else{
-                    ++map[mostCommon[i]];
-                    if(map[mostCommon[i]]>map[mostFrequentElement]){
-                        mostFrequentElement = mostCommon[i];
-                    }
-                }
-            }
-            if(mostFrequentElement!=undefined)
+            if(mostFrequentElement!==undefined)
                 alert("No data for your filters, try choosing the genre " + mostFrequentElement + "...");
         }
     }
@@ -776,7 +777,7 @@ class App extends Component {
                                     step={10}
                                     marks
                                     min={18}
-                                    max={110}
+                                    max={60}
                                     onChange={this.handleChangeNumOfGames}
                                 />
 
