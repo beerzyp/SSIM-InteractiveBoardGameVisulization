@@ -41,25 +41,7 @@ export function RadioButtonsGroup() {
     };
 }
 
-export function MultipleSelect() {
-    const [setState] = React.useState([]);
-  
-    const handleChange = event => {
-        setState(event.target.value);
-    };
-  
-    const handleChangeMultiple = event => {
-      const { options } = event.target;
-      const value = [];
-      for (let i = 0, l = options.length; i < l; i += 1) {
-        if (options[i].selected) {
-          value.push(options[i].value);
-        }
-      }
-      setState(value);
-    };
-      
-}  
+
 
 class App extends Component {
     constructor(props) {    
@@ -79,10 +61,7 @@ class App extends Component {
             isGraphBuilt: false,
             gameIdPreviousGraphBuilt: "",
             numberOfGames: 18,
-            selectedCategories: ['action','indie','adventure','role-playing-games-rpg',
-            'shooter', 'strategy', 'casual', 'simulation', 'arcade', 'puzzle', 'platformer',
-            'racing', 'sports', 'massively-multiplayer', 'family', 'fighting', 'board-games',
-            'educational', 'card']
+            selectedCategories: "action,indie,adventure,role-playing-games-rpg,shooter, strategy, casual, simulation, arcade, puzzle, platformer,racing, sports, massively-multiplayer, family, fighting, board-games,educational, card",
         };
 
         this.handleChangeSearch = this.handleChangeSearch.bind(this);
@@ -122,14 +101,11 @@ class App extends Component {
         this.setState({ numberOfGames: parseInt(event.target.innerText)});
     }
 
-    handleChangeCategorySelect = (array) => {
-        if(array !== undefined && array.length !== 0){
-            this.setState(
-                state => update(state, {selectedCategories: {$push: [array]}}) 
-            );
+    handleChangeCategorySelect(array){
+        if(array !== undefined && array.length != 0) {
+            this.state.selectedCategories = array;
         }
     }
-    
 
     async handleSubmit(event) {
         event.preventDefault();
