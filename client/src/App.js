@@ -553,7 +553,11 @@ class App extends Component {
                     if(!doesNodeExistPhaseTwo)              //Add node and edge
                     {
                         console.log(cluster_distance);
-                        const cluster_distance_ajusted = 1/(cluster_distance[l+1]);
+                        let cluster_distance_ajusted;
+                        if(cluster_distance[l+1] < 1)
+                            cluster_distance_ajusted = (2 * cluster_distance[l+1]) + 1; 
+                        //this is just a conversion so that normalized weights fit well in the graph, might need to be dynami for bigger graphs
+                        else cluster_distance_ajusted = cluster_distance[l+1];
                         console.log(eachGameRelatedGames[l].name + " distance: " + cluster_distance[l+1]);
                         console.log("ajudsted distance:" + cluster_distance_ajusted)
                         let eachNodeSize = this.getNodeSize(relatedGames[l]);

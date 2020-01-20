@@ -141,10 +141,17 @@ def runAlgorithm(X):
     '''
     size = len(X)
     # clustering to get distances of outer clusters
-    km = KMeans(n_clusters=size , random_state = 1).fit(X_normalized)
+    '''
+    km = KMeans(n_clusters=size , random_state = 0).fit(X_normalized)
+    '''
+    sc = SpectralClustering(assign_labels='discretize', n_clusters=size,
+    random_state=0).fit(X_normalized)
 
     # returns a matrix of cluster distances
+    '''
     dists = euclidean_distances(km.cluster_centers_)
+    '''
+    dists = sc.affinity_matrix_
     return dists[0] 
 
 def main():
