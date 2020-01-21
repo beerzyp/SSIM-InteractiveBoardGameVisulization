@@ -6,11 +6,11 @@ https://www.codementor.io/kakarganpat/how-to-setup-react-and-node-js-in-a-projec
 
 To run:
 
-In the root, run: npm install
-In the client folder, run: npm install
-In the server folder, run: npm install
-
-In the root, run: npm start
+1) In the root, run: npm install
+2) In the client folder, run: npm install
+3) In the server folder, run: npm install
+4) Download python 3.7+ if you don't have it, in the file server/routes/index.js in line 29 replace pythonPath with your local path to the python installation, this is a server side procedure so it needs to be done manually.
+5) In the root, run: npm start root
 
 Go to localhost:3000 for client web page
 Go to localhost:3001 for server (Express)
