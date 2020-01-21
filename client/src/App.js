@@ -221,12 +221,14 @@ class App extends Component {
 
         this.setState({ searchNameWasSubmitted: false, previouslySearchedName: "", previousNodeClickedId: "" });
 
-        //If graph to be built is already built, simply show the searched game in the side bar and return
+        //If graph to be built is already built, simply show the searched game in the side bar and return (Ignoring this step, for now)
+        /*
         if(item.id === this.state.gameIdPreviousGraphBuilt && this.state.selectedSearch === this.state.previouslySelectedSearch)
         {
             this.handleGraphNodeClick(null, item);
             return;
         }
+        */
 
         //this.setState({ isLoading: true, isGraphBuilt: false });
         //let myGraph = [];
@@ -777,27 +779,6 @@ class App extends Component {
                 <Col id="sigmaCol">
 
                     {this.displayGraph()}
-                    
-
-                        {/*<div /*style={{ 'max-width': '400px', 'height': '400px', 'margin': 'auto' }} >*/}
-                        {/*
-                        <Sigma id="sigmaGraph" style={{ width:"100%", height:"100%" }}>
-                            <LoadJSON path='data.json'/>
-                        </Sigma>
-                        */}
-                            {/* <script src="sigma.min.js"></script>
-                            <script src="sigma.parsers.json.min.js"></script>
-                            <script>
-                            {
-                            sigma.parsers.json('data.json', 
-                                {container: 'container'},
-                                {settings: ''},
-                                {defaultNodeColor: '#ec5148'}
-                                
-                            ) }
-                            </script>
-                            */}
-                        {/*</div>*/}
 
                 </Col>
             <div ref="scrolldown"></div>
