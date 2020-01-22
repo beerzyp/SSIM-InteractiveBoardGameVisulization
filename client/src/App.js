@@ -752,9 +752,9 @@ class App extends Component {
                             <div className="optionsfilter" style={{display: 'inline-block', width: 'fit-content'}}>
                                 <br></br>
                                 
-                                <Typography id="discrete-slider" gutterBottom>
+                                <FormLabel component="legend">
                                     Number Of Games
-                                </Typography>
+                            </FormLabel>        
                                 <Slider
                                     defaultValue={18}
                                     aria-labelledby="discrete-slider"
