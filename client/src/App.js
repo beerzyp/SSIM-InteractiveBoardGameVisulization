@@ -62,7 +62,10 @@ class App extends Component {
             isGraphBuilt: false,
             gameIdPreviousGraphBuilt: "",
             numberOfGames: 18,
-            selectedCategories: "action,indie,adventure,role-playing-games-rpg,shooter, strategy, casual, simulation, arcade, puzzle, platformer,racing, sports, massively-multiplayer, family, fighting, board-games,educational, card",
+            selectedCategories: ['action','indie','adventure','role-playing-games-rpg',
+            'shooter', 'strategy', 'casual', 'simulation', 'arcade', 'puzzle', 'platformer',
+            'racing', 'sports', 'massively-multiplayer', 'family', 'fighting', 'board-games',
+            'educational', 'card'],
         };
         this.search = this.search.bind(this);
         this.handleChangeSearch = this.handleChangeSearch.bind(this);
@@ -102,12 +105,17 @@ class App extends Component {
     }
 
     handleChangeNumOfGames(event) {
+        console.log(event.target.innerText);
         this.setState({ numberOfGames: parseInt(event.target.innerText)});
     }
 
     handleChangeCategorySelect(array){
         if(array !== undefined && array.length != 0) {
-            this.state.selectedCategories = array;
+            this.state.selectedCategories = [];
+            for (let index = 0; index < array.length; index++) {
+                this.state.selectedCategories.push(array[index]);    
+            }
+            console.log(this.state.selectedCategories);
         }
     }
 
@@ -684,6 +692,7 @@ class App extends Component {
     displayGraph() {
         const angle = Math.PI/3;
         if(this.state.isGraphBuilt) {
+            console.log(this.state.selectedCategories);
             if(this.state.selectedLayout === 'Force Atlas 2')
             {
                 this.selectCategories();
