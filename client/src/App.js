@@ -12,6 +12,7 @@ import Button from '@material-ui/core/Button';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormLabel from '@material-ui/core/FormLabel';
 import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import SearchOutlinedIcon from '@material-ui/icons/SearchOutlined';
 import MultiSearchSelect from "react-search-multi-select";
 import Typography from '@material-ui/core/Typography';
 import Slider from '@material-ui/core/Slider';
@@ -63,7 +64,7 @@ class App extends Component {
             numberOfGames: 18,
             selectedCategories: "action,indie,adventure,role-playing-games-rpg,shooter, strategy, casual, simulation, arcade, puzzle, platformer,racing, sports, massively-multiplayer, family, fighting, board-games,educational, card",
         };
-
+        this.search = this.search.bind(this);
         this.handleChangeSearch = this.handleChangeSearch.bind(this);
         this.handleChangeAlgoSelect = this.handleChangeAlgoSelect.bind(this);
         this.handleChangeLayoutSelect = this.handleChangeLayoutSelect.bind(this);
@@ -83,7 +84,10 @@ class App extends Component {
         this.displayGraph = this.displayGraph.bind(this);
     }
 
-
+    search(){
+        if(this.state.selectedSearch === 'Algorithm 1') this.buildGraphAlgorithm1(this.state.nodeClicked);
+        else this.buildGraphAlgorithm2(this.state.nodeClicked);
+    }
     handleChangeSearch(event) {
         this.setState({ searchName: event.target.value });
     }
@@ -218,7 +222,6 @@ class App extends Component {
 
 
     /*async*/ buildGraph(item) {
-
         this.setState({ searchNameWasSubmitted: false, previouslySearchedName: "", previousNodeClickedId: "" });
 
         //If graph to be built is already built, simply show the searched game in the side bar and return (Ignoring this step, for now)
@@ -519,7 +522,7 @@ class App extends Component {
                     k++;
                 }
                 let cluster_distance = [];
-                if(relatedDistances[j] === undefined) {
+                if(typeof relatedDistances[j] === 'undefined') {
                     cluster_distance = Array(related_games.length).fill(1.0)
                 }
                 else cluster_distance = relatedDistances[j];
@@ -557,7 +560,7 @@ class App extends Component {
                         console.log(cluster_distance);
                         let cluster_distance_ajusted;
                         if(cluster_distance[l+1] < 1)
-                            cluster_distance_ajusted = (2 * cluster_distance[l+1]) + 1; 
+                            cluster_distance_ajusted = (1- cluster_distance[l+1]) + 1; 
                         //this is just a conversion so that normalized weights fit well in the graph, might need to be dynami for bigger graphs
                         else cluster_distance_ajusted = cluster_distance[l+1];
                         console.log(eachGameRelatedGames[l].name + " distance: " + cluster_distance[l+1]);
@@ -565,7 +568,7 @@ class App extends Component {
                         let eachNodeSize = this.getNodeSize(relatedGames[l]);
                         let eachNodeColor = this.getNodeColor(relatedGames[l]);
                         myGraph.nodes.push({id: eachGameRelatedGames[l].id, label: eachGameRelatedGames[l].name, size:eachNodeSize, color:eachNodeColor, category:item.genres});
-                        myGraph.edges.push({id: 'e' + relatedGames[j].id + 'e' + eachGameRelatedGames[l].id, source: relatedGames[j].id, target: eachGameRelatedGames[l].id, label: "SEES", weight:-cluster_distance_ajusted});   
+                        myGraph.edges.push({id: 'e' + relatedGames[j].id + 'e' + eachGameRelatedGames[l].id, source: relatedGames[j].id, target: eachGameRelatedGames[l].id, label: "SEES", weight:cluster_distance_ajusted});   
                     }
                 }
                 
@@ -620,7 +623,7 @@ class App extends Component {
 
                 return (
                     <Row id="gameClickedOnGraph">
-                        <h4> { gameName } </h4>
+                        <button type="submit" onClick={ this.search }><h4> { gameName } </h4></button>
                         <img 
                             src = { gameImage }
                             alt="Board Game"
@@ -699,7 +702,7 @@ class App extends Component {
                     <Sigma id="sigmaGraph" style={{ width:"100%", height:"100%" }} onClickNode={this.handleGraphNodeClick} graph={this.state.graphJson} settings={{drawEdges: true, clone: false}}>
                         <RelativeSize initialSize={1}/>
                         <RandomizeNodePositions/>
-                        <ForceLink nodeSiblingsAngleMin={angle} edgeWeightInfluence={4}/* this attracts nodes connected with edges of positive weight edgeWeightInfluence={2}*//>
+                        <ForceLink nodeSiblingsAngleMin={angle} edgeWeightInfluence={2}/* this attracts nodes connected with edges of positive weight edgeWeightInfluence={2}*//>
                     </Sigma>
                 )
             }

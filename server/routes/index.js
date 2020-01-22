@@ -26,7 +26,7 @@ router.post('/gameSearch', function (req, res) {
   const correctedPath = path.normalize(path.resolve(somePath));
   const singleQuote = "'";  
   //chunks = chunkSubstr(req.body.games,30000);
-  let pyshell = new PythonShell(correctedPath,{pythonPath : 'C:/Users/USER/AppData/Local/Programs/Python/Python37/python.exe'});
+  let pyshell = new PythonShell(correctedPath,{pythonPath : 'C:/Users/USER/AppData/Local/Programs/Python/Python38-32/python.exe'});
   pyshell.send(JSON.stringify(req.body.games));
   let list = [];
   pyshell.on('message', function (message) {

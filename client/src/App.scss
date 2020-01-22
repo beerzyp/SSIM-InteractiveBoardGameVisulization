@@ -8,6 +8,31 @@
   height: 700px;
 }
 
+#gameClickedOnGraph > button {
+  border: 1px;
+  background-color: inherit;
+  padding: 14px 28px;
+  width: 211px;
+  font-size: 16px;
+  cursor: pointer;
+  display: inline-block;
+  padding: 6px 16px;
+  margin-bottom: 2px;
+  min-width: 64px;
+  box-sizing: border-box;
+  transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  font-weight: 500;
+  line-height: 1.75;
+  border-radius: 4px;
+  letter-spacing: 0.02857em;
+  text-transform: uppercase;
+}
+
+#gameClickedOnGraph > button:hover {
+  background-color: #5060bb;
+  color: white;
+}
 
 //Side Bar Style
 
@@ -96,6 +121,8 @@
 
 #sideBar > form > button {
   margin-top: 2%;
+  margin-left: 25%;
+  background: #5060bb;
 }
 
 #sideBar > form > div.optionsfilter {

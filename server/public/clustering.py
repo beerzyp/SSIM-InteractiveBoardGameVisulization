@@ -172,7 +172,7 @@ def main():
         clusterDf = pd.merge(clusterDf, genres, how='outer', left_index=True, right_index=True)
         # Dropping unwanted columns
         clusterDf = clusterDf[clusterDf.columns.drop(list(clusterDf.filter(regex='clip')))]
-        clusterDf = clusterDf.drop(columns=['background_image', \
+        clusterDf = clusterDf.drop(columns=['id', 'background_image', \
             'user_game', 'stores', 'short_screenshots', 'name', 'slug', 'dominant_color', \
             'saturated_color', 'short_description', 'ratings', 'platforms','parent_platforms', 'genres']) #for now ignoring platform and parent_platform 
         json_dist = json.dumps(runAlgorithm(clusterDf).tolist(), separators=(',', ':'))
