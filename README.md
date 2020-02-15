@@ -1,4 +1,4 @@
-Instructions to run the project:
+## Instructions to run the project:
 
 1) Have Node.js installed in the machine
 2) In the root, run: npm install
@@ -11,3 +11,7 @@ Instructions to run the project:
 
 Go to localhost:3000 for client web page
 Go to localhost:3001 for server (Express)
+
+## Research Paper
+### Video Game Interactive Network Visualization
+https://drive.google.com/file/d/1f21wPZVTI5Sk64y_YdQBDPg9_kjALDlW/view?usp=sharing
