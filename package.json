@@ -2,6 +2,7 @@
   "name": "vgnetwork",
   "version": "1.0.0",
   "description": "",
+  "homepage": "./client",
   "scripts": {
     "client": "cd client && npm run start",
     "server": "nodemon server.js",
