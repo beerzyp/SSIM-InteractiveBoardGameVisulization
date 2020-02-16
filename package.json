@@ -14,7 +14,7 @@
     "heroku"
   ],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "concurrently": "^5.0.0"
   },
