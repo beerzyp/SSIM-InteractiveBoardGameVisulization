@@ -1,8 +1,8 @@
 {
   "name": "vgnetwork",
   "version": "1.0.0",
-  "description": "",
-  "homepage": "./client",
+  "description": "https://drive.google.com/file/d/1f21wPZVTI5Sk64y_YdQBDPg9_kjALDlW/view?usp=sharing",
+  "homepage": "http://./client",
   "scripts": {
     "client": "cd client && npm run start",
     "server": "nodemon server.js",
@@ -15,12 +15,20 @@
     "node",
     "heroku"
   ],
-  "author": "",
+  "author": "Bernardo Ramos, Buno Miguel",
   "license": "MIT",
   "devDependencies": {
     "concurrently": "^5.0.0"
   },
   "engines": {
     "node": "10.x"
+  },
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/beerzyp/SSIM-InteractiveBoardGameVisulization.git"
+  },
+  "bugs": {
+    "url": "https://github.com/beerzyp/SSIM-InteractiveBoardGameVisulization/issues"
   }
 }
