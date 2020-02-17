@@ -18,7 +18,7 @@
   "engines": {
     "node": "10.x"
   },
-  "main": "src/index.js",
+  "main": "src/App.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/beerzyp/SSIM-InteractiveBoardGameVisulization.git"
