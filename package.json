@@ -2,8 +2,9 @@
   "name": "vgnetwork",
   "version": "1.0.0",
   "description": "https://drive.google.com/file/d/1f21wPZVTI5Sk64y_YdQBDPg9_kjALDlW/view?usp=sharing",
-  "scripts": {
-    "start": "node client",
+   "scripts": {
+    "start": "node server",
+    "build": "cd client/ && npm install && npm run build"
   },
   "keywords": [
     "node",
