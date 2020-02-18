@@ -1,3 +1,6 @@
+## Deployment
+### Algorirthm 2 is server side and currently not working, working on the fix
+https://videogamenetwork.herokuapp.com/
 ## Research Paper
 ### Video Game Interactive Network Visualization
 https://drive.google.com/file/d/1f21wPZVTI5Sk64y_YdQBDPg9_kjALDlW/view?usp=sharing
